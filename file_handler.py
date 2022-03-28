@@ -21,7 +21,10 @@ class FileCreator(Creator):
 class FileHandler(Handler):
     def __init__(self, source):
         if source:
-            self.source_handler = open(source)
+            try:
+                self.source_handler = open(source, "r")
+            except FileNotFoundError:
+                self.source_handler = None
         else:
             self.source_handler = sys.stdin
 

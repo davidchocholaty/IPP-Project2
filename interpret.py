@@ -8,7 +8,7 @@
 # Popis: Hlavni skript interpreteru pro jazyk IPPcode22                  #
 #                                                                        #
 ##########################################################################
-import argparse
+
 import sys
 
 from argument_handler import ArgumentCreator, ArgumentHandler
@@ -24,23 +24,35 @@ def print_help():
     print("\t-s ZDROJ, --source ZDROJ\n")
     print("\t-i VSTUP, --input VSTUP\n")
 
+    sys.exit(ExitCode.EXIT_SUCCESS.value)
 
-def handle_args(args, leftovers):
+
+def handle_args(arg_handler):
+    args, leftovers = arg_handler.handler
+
+    # Na vstupu zadany nezname parametry
+    if len(leftovers) > 0:
+        sys.exit(ExitCode.WRONG_OPTION.value)
+
+    # Napoveda
     if args.help:
-        print_help()
+        if args.input is None and args.source is None:
+            print_help()
+        else:
+            # S parametrem help byl zadan i nektery z dalsich volitelnych parametry
+            sys.exit(ExitCode.WRONG_OPTION.value)
+
+    # Alespon jeden z parametru musi byt vzdy zadan
+    if args.source is None and args.input is None:
+        sys.exit(ExitCode.WRONG_OPTION.value)
+
+    return args.source, args.input
 
 
 def handle_user_input():
     arg_handler = ArgumentCreator("store_true")
 
-    args, leftovers = arg_handler.handler
-
-    handle_args(args, leftovers)
-
-    # TODO leftovers
-
-    source_data = args.source
-    input_data = args.input
+    source_data, input_data = handle_args(arg_handler)
 
     source_file = FileCreator(source_data)
     source_handler = source_file.handler
@@ -48,8 +60,14 @@ def handle_user_input():
     input_file = FileCreator(input_data)
     input_handler = input_file.handler
 
+    if source_handler is None or input_handler is None:
+        sys.exit(ExitCode.OPEN_INPUT_FILE_ERROR.value)
+
+    return source_handler, input_handler
+
+
 def main():
-    handle_user_input()
+    source_handler, input_handler = handle_user_input()
 
 
 if __name__ == '__main__':
