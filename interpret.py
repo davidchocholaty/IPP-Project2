@@ -8,14 +8,34 @@
 # Popis: Hlavni skript interpreteru pro jazyk IPPcode22                  #
 #                                                                        #
 ##########################################################################
+import argparse
+import sys
 
 from argument_handler import ArgumentCreator, ArgumentHandler
 from file_handler import FileCreator, FileHandler
+from exit_code import ExitCode
 
 
-def handle_args():
-    arg_handler = ArgumentCreator(False)
+def print_help():
+    print("napoveda: interpret.py [-h] [-s ZDROJ] [-i VSTUP]\n")
+    print("\n")
+    print("volitelne argumenty:\n")
+    print("\t-h, --help\n")
+    print("\t-s ZDROJ, --source ZDROJ\n")
+    print("\t-i VSTUP, --input VSTUP\n")
+
+
+def handle_args(args, leftovers):
+    if args.help:
+        print_help()
+
+
+def handle_user_input():
+    arg_handler = ArgumentCreator("store_true")
+
     args, leftovers = arg_handler.handler
+
+    handle_args(args, leftovers)
 
     # TODO leftovers
 
@@ -28,9 +48,8 @@ def handle_args():
     input_file = FileCreator(input_data)
     input_handler = input_file.handler
 
-
 def main():
-    handle_args()
+    handle_user_input()
 
 
 if __name__ == '__main__':
