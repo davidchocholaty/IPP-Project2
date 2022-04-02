@@ -12,7 +12,7 @@
 import sys
 
 from xml.etree.ElementTree import ParseError
-from custom_exception import MultipleOccurenceError
+from custom_exception import MultipleOccurenceError, InvalidOperandValue, InvalidXMLFormat
 from argument_handler import ArgumentCreator
 from file_handler import FileCreator
 from exit_code import ExitCode
@@ -104,7 +104,14 @@ def init_interpret(root):
 
 def run_interpret(root):
     interpret = init_interpret(root)
-    interpret.run()
+
+    try:
+        interpret.run()
+    except InvalidOperandValue:
+        sys.exit(ExitCode.SEMANTIC_CHECK_ERROR.value)
+    except InvalidXMLFormat:
+        sys.exit(ExitCode.WRONG_XML_STRUCTURE.value)
+    # TODO
 
 
 def close_files(source_handler, input_handler):

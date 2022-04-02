@@ -13,3 +13,15 @@ class MultipleOccurenceError(Exception):
     def __init__(self, msg="Multiple label definition occurence"):
         self.msg = msg
         super().__init__(self.msg)
+
+
+class InvalidOperandValue(Exception):
+    def __init__(self, msg="Invalid operand value"):
+        self.msg = msg
+        super().__init__(self.msg)
+
+
+class InvalidXMLFormat(Exception):
+    def __init__(self, msg="Invalid XML format"):
+        self.msg = msg
+        super().__init__(self.msg)

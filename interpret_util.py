@@ -9,7 +9,7 @@
 #                                                                        #
 ##########################################################################
 
-from custom_exception import MultipleOccurenceError
+from custom_exception import MultipleOccurenceError, InvalidOperandValue, InvalidXMLFormat
 from xml.etree.ElementTree import ParseError
 from instruction import Instruction
 
@@ -59,6 +59,14 @@ class Interpret:
                 raise
             except ParseError:
                 raise
+
+            try:
+                instruction.parse_instruction()
+            except InvalidOperandValue:
+                raise
+            except InvalidXMLFormat:
+                raise
+            # TODO
 
             instruction.execute()
 
