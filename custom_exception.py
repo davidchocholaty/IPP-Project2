@@ -49,3 +49,9 @@ class ZeroDivision(Exception):
     def __init__(self, msg="Zero division"):
         self.msg = msg
         super().__init__(self.msg)
+
+
+class UnexpectedInstructionError(Exception):
+    def __init__(self, msg="Unexpected instruction"):
+        self.msg = msg
+        super().__init__(self.msg)

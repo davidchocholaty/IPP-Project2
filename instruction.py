@@ -12,7 +12,7 @@
 from instruction_set import inst_set
 from operand import Operand, create_operand
 from custom_exception import InvalidOperandValue, InvalidXMLFormat, FrameNotExist, VariableNotExist, \
-    InvalidOperandType, ZeroDivision
+    InvalidOperandType, ZeroDivision, UnexpectedInstructionError
 from instruction_util import save_var_to_frame, get_arg_val, check_is_existing_variable
 
 
@@ -108,41 +108,52 @@ class Instruction:
         except InvalidXMLFormat:
             raise
 
+    def arithmetic(self, runtime_enviroment):
+        var1_frame = self.arg1.get_var_frame()
+        var1_name = self.arg1.get_var_name()
+
+        try:
+            check_is_existing_variable(runtime_enviroment, var1_frame, var1_name)
+            arg2_value = get_arg_val(runtime_enviroment, self.arg2)
+            arg3_value = get_arg_val(runtime_enviroment, self.arg3)
+        except InvalidXMLFormat:
+            raise
+        except VariableNotExist:
+            raise
+        except FrameNotExist:
+            raise
+
+        if not isinstance(arg2_value, int) or not isinstance(arg3_value, int):
+            raise InvalidOperandType
+
+        if self.opcode == "ADD":
+            res = arg2_value + arg3_value
+        elif self.opcode == "SUB":
+            res = arg2_value - arg3_value
+        elif self.opcode == "MUL":
+            res = arg2_value * arg3_value
+        elif self.opcode == "IDIV":
+            if arg3_value == 0:
+                raise ZeroDivision
+
+            res = int(arg2_value / arg3_value)
+        else:
+            raise UnexpectedInstructionError
+
+        save_var_to_frame(runtime_enviroment, var1_frame, var1_name, res)
+
     def execute(self, runtime_enviroment):
         try:
             if self.opcode == "MOVE":
-                #if self.arg2.get_type() == "label":
-                    # TODO error
+                if self.arg2.get_type() == "label":
+                    raise InvalidXMLFormat
 
                 var1_frame = self.arg1.get_var_frame()
                 var1_name = self.arg1.get_var_name()
 
-                # status, status_code = is_existing_var(runtime_enviroment, var1_frame, var1_name)
-                #
-                # if status:
-                #     if self.arg2.get_type() == "var":
-                #         var2_frame = self.arg2.get_var_frame()
-                #         var2_name = self.arg2.get_var_name()
-                #
-                #         status, status_code = is_existing_var(runtime_enviroment, var2_frame, var2_name)
-                #
-                #         #if not status:
-                #             # TODO error se status_code
-
-                try:
-                    arg2_value = get_arg_val(runtime_enviroment, self.arg2)
-                except InvalidXMLFormat:
-                    raise
-                except VariableNotExist:
-                    raise
-                except FrameNotExist:
-                    raise
+                arg2_value = get_arg_val(runtime_enviroment, self.arg2)
 
                 save_var_to_frame(runtime_enviroment, var1_frame, var1_name, arg2_value)
-
-                #else:
-                    # TODO error se status_code
-
 
             #elif self.opcode == "CREATEFRAME":
             #elif self.opcode == "PUSHFRAME":
@@ -157,95 +168,16 @@ class Instruction:
             #elif self.opcode == "PUSHS":
             #elif self.opcode == "POPS":
             elif self.opcode == "ADD":
-                var1_frame = self.arg1.get_var_frame()
-                var1_name = self.arg1.get_var_name()
-
-                try:
-                    check_is_existing_variable(runtime_enviroment, var1_frame, var1_name)
-                    arg2_value = get_arg_val(runtime_enviroment, self.arg2)
-                    arg3_value = get_arg_val(runtime_enviroment, self.arg3)
-                except InvalidXMLFormat:
-                    raise
-                except VariableNotExist:
-                    raise
-                except FrameNotExist:
-                    raise
-
-                if not isinstance(arg2_value, int) or not isinstance(arg3_value, int):
-                    raise InvalidOperandType
-
-                res = arg2_value + arg3_value
-
-                save_var_to_frame(runtime_enviroment, var1_frame, var1_name, res)
+                self.arithmetic(runtime_enviroment)
 
             elif self.opcode == "SUB":
-                var1_frame = self.arg1.get_var_frame()
-                var1_name = self.arg1.get_var_name()
-
-                try:
-                    check_is_existing_variable(runtime_enviroment, var1_frame, var1_name)
-                    arg2_value = get_arg_val(runtime_enviroment, self.arg2)
-                    arg3_value = get_arg_val(runtime_enviroment, self.arg3)
-                except InvalidXMLFormat:
-                    raise
-                except VariableNotExist:
-                    raise
-                except FrameNotExist:
-                    raise
-
-                if not isinstance(arg2_value, int) or not isinstance(arg3_value, int):
-                    raise InvalidOperandType
-
-                res = arg2_value - arg3_value
-
-                save_var_to_frame(runtime_enviroment, var1_frame, var1_name, res)
+                self.arithmetic(runtime_enviroment)
 
             elif self.opcode == "MUL":
-                var1_frame = self.arg1.get_var_frame()
-                var1_name = self.arg1.get_var_name()
-
-                try:
-                    check_is_existing_variable(runtime_enviroment, var1_frame, var1_name)
-                    arg2_value = get_arg_val(runtime_enviroment, self.arg2)
-                    arg3_value = get_arg_val(runtime_enviroment, self.arg3)
-                except InvalidXMLFormat:
-                    raise
-                except VariableNotExist:
-                    raise
-                except FrameNotExist:
-                    raise
-
-                if not isinstance(arg2_value, int) or not isinstance(arg3_value, int):
-                    raise InvalidOperandType
-
-                res = arg2_value * arg3_value
-
-                save_var_to_frame(runtime_enviroment, var1_frame, var1_name, res)
+                self.arithmetic(runtime_enviroment)
 
             elif self.opcode == "IDIV":
-                var1_frame = self.arg1.get_var_frame()
-                var1_name = self.arg1.get_var_name()
-
-                try:
-                    check_is_existing_variable(runtime_enviroment, var1_frame, var1_name)
-                    arg2_value = get_arg_val(runtime_enviroment, self.arg2)
-                    arg3_value = get_arg_val(runtime_enviroment, self.arg3)
-                except InvalidXMLFormat:
-                    raise
-                except VariableNotExist:
-                    raise
-                except FrameNotExist:
-                    raise
-
-                if not isinstance(arg2_value, int) or not isinstance(arg3_value, int):
-                    raise InvalidOperandType
-
-                if arg3_value == 0:
-                    raise ZeroDivision
-
-                res = int(arg2_value / arg3_value)
-
-                save_var_to_frame(runtime_enviroment, var1_frame, var1_name, res)
+                self.arithmetic(runtime_enviroment)
 
             # elif self.opcode == "LT":
             # elif self.opcode == "GT":
@@ -257,14 +189,7 @@ class Instruction:
             # elif self.opcode == "STRI2INT":
             # elif self.opcode == "READ":
             elif self.opcode == "WRITE":
-                try:
-                    val = get_arg_val(runtime_enviroment, self.arg1)
-                except InvalidXMLFormat:
-                    raise
-                except VariableNotExist:
-                    raise
-                except FrameNotExist:
-                    raise
+                val = get_arg_val(runtime_enviroment, self.arg1)
 
                 #if self.arg1.get_type() == "bool":
 
@@ -283,7 +208,17 @@ class Instruction:
             # elif self.opcode == "EXIT":
             # elif self.opcode == "DPRINT":
             # elif self.opcode == "BREAK":
+        except InvalidXMLFormat:
+            raise
+        except VariableNotExist:
+            raise
         except FrameNotExist:
+            raise
+        except InvalidOperandType:
+            raise
+        except ZeroDivision:
+            raise
+        except UnexpectedInstructionError:
             raise
 
         return
