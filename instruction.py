@@ -11,8 +11,8 @@
 
 from instruction_set import inst_set
 from operand import Operand, create_operand
-from custom_exception import InvalidOperandValue, InvalidXMLFormat, FrameNotExist
-from instruction_util import save_var_to_frame, is_existing_var, get_arg_val
+from custom_exception import InvalidOperandValue, InvalidXMLFormat, FrameNotExist, VariableNotExist
+from instruction_util import save_var_to_frame, get_arg_val
 
 
 class Instruction:
@@ -116,23 +116,32 @@ class Instruction:
                 var1_frame = self.arg1.get_var_frame()
                 var1_name = self.arg1.get_var_name()
 
-                status, status_code = is_existing_var(runtime_enviroment, var1_frame, var1_name)
+                # status, status_code = is_existing_var(runtime_enviroment, var1_frame, var1_name)
+                #
+                # if status:
+                #     if self.arg2.get_type() == "var":
+                #         var2_frame = self.arg2.get_var_frame()
+                #         var2_name = self.arg2.get_var_name()
+                #
+                #         status, status_code = is_existing_var(runtime_enviroment, var2_frame, var2_name)
+                #
+                #         #if not status:
+                #             # TODO error se status_code
 
-                if status:
-                    if self.arg2.get_type() == "var":
-                        var2_frame = self.arg2.get_var_frame()
-                        var2_name = self.arg2.get_var_name()
+                try:
+                    arg2_value = get_arg_val(runtime_enviroment, self.arg2)
+                except InvalidXMLFormat:
+                    raise
+                except VariableNotExist:
+                    raise
+                except FrameNotExist:
+                    raise
 
-                        status, status_code = is_existing_var(runtime_enviroment, var2_frame, var2_name)
+                save_var_to_frame(runtime_enviroment, var1_frame, var1_name, arg2_value)
 
-                        #if not status:
-                            # TODO error se status_code
-
-                    arg2_value = get_arg_val(self.arg2)
-
-                    save_var_to_frame(runtime_enviroment, var1_frame, var1_name, arg2_value)
                 #else:
                     # TODO error se status_code
+
 
             #elif self.opcode == "CREATEFRAME":
             #elif self.opcode == "PUSHFRAME":
@@ -167,7 +176,7 @@ class Instruction:
             # elif self.opcode == "STRI2INT":
             # elif self.opcode == "READ":
             elif self.opcode == "WRITE":
-                val = get_arg_val(self.arg1)
+                val = get_arg_val(runtime_enviroment, self.arg1)
 
                 #if self.arg1.get_type() == "bool":
 

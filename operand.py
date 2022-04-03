@@ -59,6 +59,9 @@ class Operand:
     def get_var_name(self):
         return self.var_name
 
+    def get_val(self):
+        return self.op_val
+
     def parse_operand(self):
         try:
             self.type = self.arg.attrib['type']
@@ -85,8 +88,6 @@ class Operand:
             elif self.type == "nil":
                 self.set_op_val()
             elif self.type == "int":
-                self.set_op_val()
-            elif self.type == "string":
                 self.set_op_val()
             elif self.type == "label":
                 self.set_op_val()

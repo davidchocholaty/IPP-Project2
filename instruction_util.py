@@ -9,7 +9,8 @@
 #                                                                        #
 ##########################################################################
 
-from custom_exception import FrameNotExist, VariableNotExist
+from custom_exception import InvalidXMLFormat, FrameNotExist, VariableNotExist
+
 
 def save_var_to_frame(runtime_enviroment, var_frame, var_name, var_act_value):
     if var_frame == "GF":
@@ -38,39 +39,96 @@ def save_var_to_frame(runtime_enviroment, var_frame, var_name, var_act_value):
     # else:
         # TODO error
 
-# 0 - OK
-# 1 - Variable not exist
-# 2 - Frame not exist
-def is_existing_var(runtime_enviroment, var_frame, var_name):
+
+def get_var_val(runtime_enviroment, var_frame, var_name):
+    # ?? can_miss_value
     if var_frame == "GF":
         global_frame = runtime_enviroment["global_frame"]
 
         if var_name not in global_frame.keys():
-            return False, 1
+            raise VariableNotExist
+
+        var_value = global_frame[var_name]
 
     elif var_frame == "LF":
         local_frames_stack = runtime_enviroment["local_frames_stack"]
 
         if len(local_frames_stack) == 0:
-            return False, 2
+            raise FrameNotExist
 
         local_frame = local_frames_stack[-1]
 
         if not var_name in local_frame.keys():
-            return False, 1
+            raise VariableNotExist
+
+        var_value = local_frame[var_name]
 
     elif var_frame == "TF":
         # TODO
-        return
+        return 0
+    else:
+        raise InvalidXMLFormat
 
-    return True, 0
-
-
-# def get_var_val():
-
-
-# def get_not_var_val():
+    return var_value
 
 
-def get_arg_val(arg):
-    return 12
+def bool_str_2_bool(bool_val):
+    if bool_val == "true":
+        return True
+    elif bool_val == "false":
+        return False
+    else:
+        raise InvalidXMLFormat
+
+
+def int_str_2_int(int_val):
+    try:
+        val = int(int_val)
+    except ValueError:
+        raise
+
+    return val
+
+
+def get_not_var_val(arg):
+    arg_type = arg.get_type()
+
+    if arg_type == "string":
+        # TODO
+        return 0
+    elif arg_type == "type":
+        val = arg.get_val()
+
+    elif arg_type == "bool":
+        try:
+            val = bool_str_2_bool(arg.get_val())
+        except InvalidXMLFormat:
+            raise
+
+    elif arg_type == "nil":
+        val = arg.get_val()
+
+    elif arg_type == "int":
+        try:
+            val = int_str_2_int(arg.get_val())
+        except ValueError:
+            raise InvalidXMLFormat
+
+    elif arg_type == "label":
+        val = arg.get_val()
+
+    else:
+        # TODO error
+        return 0
+
+    return val
+
+
+def get_arg_val(runtime_enviroment, arg):
+    if arg.get_type() == "var":
+        var_frame = arg.get_var_frame()
+        var_name = arg.get_var_name()
+
+        return get_var_val(runtime_enviroment, var_frame, var_name)
+
+    return get_not_var_val(arg)
