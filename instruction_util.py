@@ -1,51 +1,76 @@
 ##########################################################################
 #                                                                        #
-# Soubor: interpret.py                                                   #
+# Soubor: argument_handler.py                                            #
 # Vytvoren: 2022-04-03                                                   #
 # Posledni zmena: 2022-04-03                                             #
 # Autor: David Chocholaty <xchoch09@stud.fit.vutbr.cz>                   #
 # Projekt: Uloha 2 pro predmet IPP                                       #
-# Popis: Hlavni skript interpreteru pro jazyk IPPcode22                  #
+# Popis: Skript pro zpracovani uzivatelskych argumentu                   #
 #                                                                        #
 ##########################################################################
 
-from instruction_set import inst_set
-from operand import Operand
+from custom_exception import FrameNotExist, VariableNotExist
 
-def valid_name(name):
+def save_var_to_frame(runtime_enviroment, var_frame, var_name, var_act_value):
+    if var_frame == "GF":
+        global_frame = runtime_enviroment["global_frame"]
+        if var_name in global_frame.keys():
+            global_frame[var_name] = var_act_value
+        else:
+            global_frame.update({var_name : var_act_value})
+
+    elif var_frame == "LF":
+        local_frames_stack = runtime_enviroment["local_frames_stack"]
+
+        if len(local_frames_stack) == 0:
+            # TODO error
+            raise FrameNotExist
+
+        local_frame = local_frames_stack[-1] # posledni lokalni ramec
+
+        if var_name in local_frame.keys():
+            local_frame[var_name] = var_act_value
+        else:
+            local_frame.update({var_name: var_act_value})
+
+    # elif var_frame == "TF":
+        # TODO
+    # else:
+        # TODO error
+
+# 0 - OK
+# 1 - Variable not exist
+# 2 - Frame not exist
+def is_existing_var(runtime_enviroment, var_frame, var_name):
+    if var_frame == "GF":
+        global_frame = runtime_enviroment["global_frame"]
+
+        if var_name not in global_frame.keys():
+            return False, 1
+
+    elif var_frame == "LF":
+        local_frames_stack = runtime_enviroment["local_frames_stack"]
+
+        if len(local_frames_stack) == 0:
+            return False, 2
+
+        local_frame = local_frames_stack[-1]
+
+        if not var_name in local_frame.keys():
+            return False, 1
+
+    elif var_frame == "TF":
+        # TODO
+        return
+
+    return True, 0
 
 
-def valid_var(var):
-    if var.get_type() != "var":
-        return False
-    elif var.get_var_frame() not in ["GF", "TF", "LF"]:
-        return False
-
-    return valid_name(var.get_var_name())
+# def get_var_val():
 
 
-def valid_symb(symb):
-
-def valid_label(label):
-
-def valid_type(type):
+# def get_not_var_val():
 
 
-def valid_args(opcode, *argv):
-    expected_args = inst_set[opcode]
-
-    for (exp_arg_type, arg) in zip(expected_args, argv):
-        if exp_arg_type == "var":
-            if not valid_var(arg):
-                return False
-        elif exp_arg_type == "symb":
-            if not valid_symb(arg):
-                return False
-        elif exp_arg_type == "label":
-            if not valid_label(arg):
-                return False
-        elif exp_arg_type == "type":
-            if not valid_type(arg):
-                return False
-
-    return True
+def get_arg_val(arg):
+    return 12

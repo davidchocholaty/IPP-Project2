@@ -19,6 +19,10 @@ class Interpret:
         self.root = root
         self.labels = {}
         self.order = {}
+        self.runtime_enviroment = {
+            "global_frame": {},
+            "local_frames_stack": []
+        }
 
     def is_valid_lang(self):
         lang = self.root.attrib['language']
@@ -68,5 +72,5 @@ class Interpret:
                 raise
             # TODO
 
-            instruction.execute()
+            instruction.execute(self.runtime_enviroment)
 

@@ -25,3 +25,15 @@ class InvalidXMLFormat(Exception):
     def __init__(self, msg="Invalid XML format"):
         self.msg = msg
         super().__init__(self.msg)
+
+
+class FrameNotExist(Exception):
+    def __init__(self, msg="Frame not exist"):
+        self.msg = msg
+        super().__init__(self.msg)
+
+
+class VariableNotExist(Exception):
+    def __init__(self, msg="Variable not exist"):
+        self.msg = msg
+        super().__init__(self.msg)

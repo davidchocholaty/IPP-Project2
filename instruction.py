@@ -10,9 +10,9 @@
 ##########################################################################
 
 from instruction_set import inst_set
-from instruction_util import valid_args
 from operand import Operand, create_operand
-from custom_exception import InvalidOperandValue, InvalidXMLFormat
+from custom_exception import InvalidOperandValue, InvalidXMLFormat, FrameNotExist
+from instruction_util import save_var_to_frame, is_existing_var, get_arg_val
 
 
 class Instruction:
@@ -107,53 +107,86 @@ class Instruction:
         except InvalidXMLFormat:
             raise
 
+    def execute(self, runtime_enviroment):
+        try:
+            if self.opcode == "MOVE":
+                #if self.arg2.get_type() == "label":
+                    # TODO error
 
+                var1_frame = self.arg1.get_var_frame()
+                var1_name = self.arg1.get_var_name()
 
-    def execute(self):
-        if self.opcode == "MOVE":
+                status, status_code = is_existing_var(runtime_enviroment, var1_frame, var1_name)
 
-        #elif self.opcode == "CREATEFRAME":
-        #elif self.opcode == "PUSHFRAME":
-        #elif self.opcode == "POPFRAME":
-        elif self.opcode == "DEFVAR":
-            valid_args(self.opcode, self.arg1)
+                if status:
+                    if self.arg2.get_type() == "var":
+                        var2_frame = self.arg2.get_var_frame()
+                        var2_name = self.arg2.get_var_name()
 
-        #elif self.opcode == "CALL":
-        #elif self.opcode == "RETURN":
-        #elif self.opcode == "PUSHS":
-        #elif self.opcode == "POPS":
-        # elif self.opcode == "ADD":
-        # elif self.opcode == "SUB":
-        # elif self.opcode == "MUL":
-        # elif self.opcode == "IDIV":
-        # elif self.opcode == "LT":
-        # elif self.opcode == "GT":
-        # elif self.opcode == "EQ":
-        # elif self.opcode == "AND":
-        # elif self.opcode == "SUB":
-        # elif self.opcode == "MUL":
-        # elif self.opcode == "IDIV":
-        # elif self.opcode == "LT":
-        # elif self.opcode == "GT":
-        # elif self.opcode == "EQ":
-        # elif self.opcode == "AND":
-        # elif self.opcode == "OR":
-        # elif self.opcode == "NOT":
-        # elif self.opcode == "INT2CHAR":
-        # elif self.opcode == "STRI2INT":
-        # elif self.opcode == "READ":
-        # elif self.opcode == "WRITE":
-        # elif self.opcode == "CONCAT":
-        # elif self.opcode == "STRLEN":
-        # elif self.opcode == "GETCHAR":
-        # elif self.opcode == "SETCHAR":
-        # elif self.opcode == "TYPE":
-        # elif self.opcode == "LABEL":
-        # elif self.opcode == "JUMP":
-        # elif self.opcode == "JUMPIFEQ":
-        # elif self.opcode == "JUMPIFNEQ":
-        # elif self.opcode == "EXIT":
-        # elif self.opcode == "DPRINT":
-        # elif self.opcode == "BREAK":
+                        status, status_code = is_existing_var(runtime_enviroment, var2_frame, var2_name)
+
+                        #if not status:
+                            # TODO error se status_code
+
+                    arg2_value = get_arg_val(self.arg2)
+
+                    save_var_to_frame(runtime_enviroment, var1_frame, var1_name, arg2_value)
+                #else:
+                    # TODO error se status_code
+
+            #elif self.opcode == "CREATEFRAME":
+            #elif self.opcode == "PUSHFRAME":
+            #elif self.opcode == "POPFRAME":
+            elif self.opcode == "DEFVAR":
+                var_frame = self.arg1.get_var_frame()
+                var_name = self.arg1.get_var_name()
+                save_var_to_frame(runtime_enviroment, var_frame, var_name, None)
+
+            #elif self.opcode == "CALL":
+            #elif self.opcode == "RETURN":
+            #elif self.opcode == "PUSHS":
+            #elif self.opcode == "POPS":
+            # elif self.opcode == "ADD":
+            # elif self.opcode == "SUB":
+            # elif self.opcode == "MUL":
+            # elif self.opcode == "IDIV":
+            # elif self.opcode == "LT":
+            # elif self.opcode == "GT":
+            # elif self.opcode == "EQ":
+            # elif self.opcode == "AND":
+            # elif self.opcode == "SUB":
+            # elif self.opcode == "MUL":
+            # elif self.opcode == "IDIV":
+            # elif self.opcode == "LT":
+            # elif self.opcode == "GT":
+            # elif self.opcode == "EQ":
+            # elif self.opcode == "AND":
+            # elif self.opcode == "OR":
+            # elif self.opcode == "NOT":
+            # elif self.opcode == "INT2CHAR":
+            # elif self.opcode == "STRI2INT":
+            # elif self.opcode == "READ":
+            elif self.opcode == "WRITE":
+                val = get_arg_val(self.arg1)
+
+                #if self.arg1.get_type() == "bool":
+
+                val = str(val)
+                print(val, end='', flush=True)
+
+            # elif self.opcode == "CONCAT":
+            # elif self.opcode == "STRLEN":
+            # elif self.opcode == "GETCHAR":
+            # elif self.opcode == "SETCHAR":
+            # elif self.opcode == "TYPE":
+            # elif self.opcode == "LABEL":
+            # elif self.opcode == "JUMP":
+            # elif self.opcode == "JUMPIFEQ":
+            # elif self.opcode == "JUMPIFNEQ":
+            # elif self.opcode == "EXIT":
+            # elif self.opcode == "DPRINT":
+            # elif self.opcode == "BREAK":
+        except FrameNotExist:
+            raise
 
         return
