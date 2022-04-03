@@ -61,7 +61,7 @@ class Interpret:
                 raise
 
             try:
-                instruction.parse_instruction()
+                instruction.parse_instruction(inst_order)
             except InvalidOperandValue:
                 raise
             except InvalidXMLFormat:

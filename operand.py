@@ -15,7 +15,7 @@ from custom_exception import InvalidOperandValue, InvalidXMLFormat
 
 
 def create_operand(arg):
-    if arg:
+    if arg is not None:
         operand = Operand(arg)
     else:
         raise InvalidXMLFormat
@@ -49,6 +49,15 @@ class Operand:
 
     def set_var_name(self):
         self.var_name = search(r'(?<=@).*', self.op_val).group(0)
+
+    def get_type(self):
+        return self.type
+
+    def get_var_frame(self):
+        return self.var_frame
+
+    def get_var_name(self):
+        return self.var_name
 
     def parse_operand(self):
         try:

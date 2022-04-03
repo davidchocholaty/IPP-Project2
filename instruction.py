@@ -10,6 +10,7 @@
 ##########################################################################
 
 from instruction_set import inst_set
+from instruction_util import valid_args
 from operand import Operand, create_operand
 from custom_exception import InvalidOperandValue, InvalidXMLFormat
 
@@ -28,8 +29,8 @@ class Instruction:
         if len(root_args) >= 0:
             raise InvalidXMLFormat
 
-    def one_arg(self, inst_arg):
-        root_args = self.root[self.opcode]
+    def one_arg(self, inst_order):
+        root_args = self.root[inst_order]
 
         if len(root_args) == 1:
             fst_arg = root_args.find("arg1")
@@ -44,8 +45,8 @@ class Instruction:
         else:
             raise InvalidXMLFormat
 
-    def two_args(self, inst_args):
-        root_args = self.root[self.opcode]
+    def two_args(self, inst_order):
+        root_args = self.root[inst_order]
 
         if len(root_args) == 2:
             fst_arg = root_args.find("arg1")
@@ -62,8 +63,8 @@ class Instruction:
         else:
             raise InvalidXMLFormat
 
-    def three_args(self, inst_args):
-        root_args = self.root[self.opcode]
+    def three_args(self, inst_order):
+        root_args = self.root[inst_order]
 
         if len(root_args) == 3:
             fst_arg = root_args.find("arg1")
@@ -82,7 +83,7 @@ class Instruction:
         else:
             raise InvalidXMLFormat
 
-    def parse_instruction(self):
+    def parse_instruction(self, inst_order):
         if self.opcode in inst_set:
             inst_args = inst_set[self.opcode]
             args_cnt = len(inst_args)
@@ -93,11 +94,11 @@ class Instruction:
             if args_cnt == 0:
                 self.no_arg()
             elif args_cnt == 1:
-                self.one_arg(inst_args)
+                self.one_arg(inst_order)
             elif args_cnt == 2:
-                self.two_args(inst_args)
+                self.two_args(inst_order)
             elif args_cnt == 3:
-                self.three_args(inst_args)
+                self.three_args(inst_order)
             else:
                 raise InvalidXMLFormat
 
@@ -106,6 +107,53 @@ class Instruction:
         except InvalidXMLFormat:
             raise
 
+
+
     def execute(self):
-        # TODO
+        if self.opcode == "MOVE":
+
+        #elif self.opcode == "CREATEFRAME":
+        #elif self.opcode == "PUSHFRAME":
+        #elif self.opcode == "POPFRAME":
+        elif self.opcode == "DEFVAR":
+            valid_args(self.opcode, self.arg1)
+
+        #elif self.opcode == "CALL":
+        #elif self.opcode == "RETURN":
+        #elif self.opcode == "PUSHS":
+        #elif self.opcode == "POPS":
+        # elif self.opcode == "ADD":
+        # elif self.opcode == "SUB":
+        # elif self.opcode == "MUL":
+        # elif self.opcode == "IDIV":
+        # elif self.opcode == "LT":
+        # elif self.opcode == "GT":
+        # elif self.opcode == "EQ":
+        # elif self.opcode == "AND":
+        # elif self.opcode == "SUB":
+        # elif self.opcode == "MUL":
+        # elif self.opcode == "IDIV":
+        # elif self.opcode == "LT":
+        # elif self.opcode == "GT":
+        # elif self.opcode == "EQ":
+        # elif self.opcode == "AND":
+        # elif self.opcode == "OR":
+        # elif self.opcode == "NOT":
+        # elif self.opcode == "INT2CHAR":
+        # elif self.opcode == "STRI2INT":
+        # elif self.opcode == "READ":
+        # elif self.opcode == "WRITE":
+        # elif self.opcode == "CONCAT":
+        # elif self.opcode == "STRLEN":
+        # elif self.opcode == "GETCHAR":
+        # elif self.opcode == "SETCHAR":
+        # elif self.opcode == "TYPE":
+        # elif self.opcode == "LABEL":
+        # elif self.opcode == "JUMP":
+        # elif self.opcode == "JUMPIFEQ":
+        # elif self.opcode == "JUMPIFNEQ":
+        # elif self.opcode == "EXIT":
+        # elif self.opcode == "DPRINT":
+        # elif self.opcode == "BREAK":
+
         return
