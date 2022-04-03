@@ -10,7 +10,7 @@
 ##########################################################################
 
 from custom_exception import MultipleOccurenceError, InvalidOperandValue, InvalidXMLFormat, VariableNotExist, \
-    FrameNotExist
+    FrameNotExist, ZeroDivision
 from xml.etree.ElementTree import ParseError
 from instruction import Instruction
 
@@ -79,5 +79,7 @@ class Interpret:
             except VariableNotExist:
                 raise
             except FrameNotExist:
+                raise
+            except ZeroDivision:
                 raise
 

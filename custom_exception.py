@@ -43,3 +43,9 @@ class VariableNotExist(Exception):
     def __init__(self, msg="Variable not exist"):
         self.msg = msg
         super().__init__(self.msg)
+
+
+class ZeroDivision(Exception):
+    def __init__(self, msg="Zero division"):
+        self.msg = msg
+        super().__init__(self.msg)
