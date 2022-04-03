@@ -40,15 +40,12 @@ def save_var_to_frame(runtime_enviroment, var_frame, var_name, var_act_value):
         # TODO error
 
 
-def get_var_val(runtime_enviroment, var_frame, var_name):
-    # ?? can_miss_value
+def check_is_existing_variable(runtime_enviroment, var_frame, var_name):
     if var_frame == "GF":
         global_frame = runtime_enviroment["global_frame"]
 
         if var_name not in global_frame.keys():
             raise VariableNotExist
-
-        var_value = global_frame[var_name]
 
     elif var_frame == "LF":
         local_frames_stack = runtime_enviroment["local_frames_stack"]
@@ -58,18 +55,12 @@ def get_var_val(runtime_enviroment, var_frame, var_name):
 
         local_frame = local_frames_stack[-1]
 
-        if not var_name in local_frame.keys():
-            raise VariableNotExist
-
-        var_value = local_frame[var_name]
+        if var_name not in local_frame.keys():
+            return VariableNotExist
 
     elif var_frame == "TF":
         # TODO
-        return 0
-    else:
-        raise InvalidXMLFormat
-
-    return var_value
+        return
 
 
 def bool_str_2_bool(bool_val):
@@ -88,6 +79,38 @@ def int_str_2_int(int_val):
         raise
 
     return val
+
+
+def get_var_val(runtime_enviroment, var_frame, var_name):
+    # ?? can_miss_value
+    if var_frame == "GF":
+        global_frame = runtime_enviroment["global_frame"]
+
+        if var_name not in global_frame.keys():
+            raise VariableNotExist
+
+        var_value = global_frame[var_name]
+
+    elif var_frame == "LF":
+        local_frames_stack = runtime_enviroment["local_frames_stack"]
+
+        if len(local_frames_stack) == 0:
+            raise FrameNotExist
+
+        local_frame = local_frames_stack[-1]
+
+        if var_name not in local_frame.keys():
+            raise VariableNotExist
+
+        var_value = local_frame[var_name]
+
+    elif var_frame == "TF":
+        # TODO
+        return 0
+    else:
+        raise InvalidXMLFormat
+
+    return var_value
 
 
 def get_not_var_val(arg):

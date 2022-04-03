@@ -12,7 +12,8 @@
 import sys
 
 from xml.etree.ElementTree import ParseError
-from custom_exception import MultipleOccurenceError, InvalidOperandValue, InvalidXMLFormat
+from custom_exception import MultipleOccurenceError, InvalidOperandValue, InvalidXMLFormat, VariableNotExist, \
+    FrameNotExist
 from argument_handler import ArgumentCreator
 from file_handler import FileCreator
 from exit_code import ExitCode
@@ -111,6 +112,10 @@ def run_interpret(root):
         sys.exit(ExitCode.SEMANTIC_CHECK_ERROR.value)
     except InvalidXMLFormat:
         sys.exit(ExitCode.WRONG_XML_STRUCTURE.value)
+    except VariableNotExist:
+        sys.exit(ExitCode.RUNTIME_VAR_NOT_EXISTS.value)
+    except FrameNotExist:
+        sys.exit(ExitCode.RUNTIME_FRAME_NOT_EXISTS.value)
     # TODO
 
 

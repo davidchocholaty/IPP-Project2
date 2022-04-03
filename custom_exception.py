@@ -27,6 +27,12 @@ class InvalidXMLFormat(Exception):
         super().__init__(self.msg)
 
 
+class InvalidOperandType(Exception):
+    def __init__(self, msg="Invalid operand type"):
+        self.msg = msg
+        super().__init__(self.msg)
+
+
 class FrameNotExist(Exception):
     def __init__(self, msg="Frame not exist"):
         self.msg = msg

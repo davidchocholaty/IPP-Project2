@@ -9,7 +9,8 @@
 #                                                                        #
 ##########################################################################
 
-from custom_exception import MultipleOccurenceError, InvalidOperandValue, InvalidXMLFormat
+from custom_exception import MultipleOccurenceError, InvalidOperandValue, InvalidXMLFormat, VariableNotExist, \
+    FrameNotExist
 from xml.etree.ElementTree import ParseError
 from instruction import Instruction
 
@@ -70,7 +71,13 @@ class Interpret:
                 raise
             except InvalidXMLFormat:
                 raise
-            # TODO
 
-            instruction.execute(self.runtime_enviroment)
+            try:
+                instruction.execute(self.runtime_enviroment)
+            except InvalidXMLFormat:
+                raise
+            except VariableNotExist:
+                raise
+            except FrameNotExist:
+                raise
 
