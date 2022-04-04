@@ -12,16 +12,16 @@
 from custom_exception import InvalidXMLFormat, FrameNotExist, VariableNotExist
 
 
-def save_var_to_frame(runtime_enviroment, var_frame, var_name, var_act_value):
+def save_var_to_frame(runtime_environment, var_frame, var_name, var_act_value):
     if var_frame == "GF":
-        global_frame = runtime_enviroment["global_frame"]
+        global_frame = runtime_environment["global_frame"]
         if var_name in global_frame.keys():
             global_frame[var_name] = var_act_value
         else:
             global_frame.update({var_name : var_act_value})
 
     elif var_frame == "LF":
-        local_frames_stack = runtime_enviroment["local_frames_stack"]
+        local_frames_stack = runtime_environment["local_frames_stack"]
 
         if len(local_frames_stack) == 0:
             # TODO error
@@ -40,15 +40,15 @@ def save_var_to_frame(runtime_enviroment, var_frame, var_name, var_act_value):
         # TODO error
 
 
-def check_is_existing_variable(runtime_enviroment, var_frame, var_name):
+def check_is_existing_variable(runtime_environment, var_frame, var_name):
     if var_frame == "GF":
-        global_frame = runtime_enviroment["global_frame"]
+        global_frame = runtime_environment["global_frame"]
 
         if var_name not in global_frame.keys():
             raise VariableNotExist
 
     elif var_frame == "LF":
-        local_frames_stack = runtime_enviroment["local_frames_stack"]
+        local_frames_stack = runtime_environment["local_frames_stack"]
 
         if len(local_frames_stack) == 0:
             raise FrameNotExist
@@ -81,10 +81,10 @@ def int_str_2_int(int_val):
     return val
 
 
-def get_var_val(runtime_enviroment, var_frame, var_name):
+def get_var_val(runtime_environment, var_frame, var_name):
     # ?? can_miss_value
     if var_frame == "GF":
-        global_frame = runtime_enviroment["global_frame"]
+        global_frame = runtime_environment["global_frame"]
 
         if var_name not in global_frame.keys():
             raise VariableNotExist
@@ -92,7 +92,7 @@ def get_var_val(runtime_enviroment, var_frame, var_name):
         var_value = global_frame[var_name]
 
     elif var_frame == "LF":
-        local_frames_stack = runtime_enviroment["local_frames_stack"]
+        local_frames_stack = runtime_environment["local_frames_stack"]
 
         if len(local_frames_stack) == 0:
             raise FrameNotExist
@@ -147,11 +147,11 @@ def get_not_var_val(arg):
     return val
 
 
-def get_arg_val(runtime_enviroment, arg):
+def get_arg_val(runtime_environment, arg):
     if arg.get_type() == "var":
         var_frame = arg.get_var_frame()
         var_name = arg.get_var_name()
 
-        return get_var_val(runtime_enviroment, var_frame, var_name)
+        return get_var_val(runtime_environment, var_frame, var_name)
 
     return get_not_var_val(arg)

@@ -82,7 +82,7 @@ def parse_input_xml(source_handler):
     return root
 
 
-def init_interpret(root):
+def init_interpret(root, input_handler):
     interpret = Interpret(root)
 
     if not interpret.is_valid_lang():
@@ -100,11 +100,13 @@ def init_interpret(root):
     except MultipleOccurenceError:
         sys.exit(ExitCode.WRONG_XML_STRUCTURE.value)
 
+    interpret.set_input_handler(input_handler)
+
     return interpret
 
 
-def run_interpret(root):
-    interpret = init_interpret(root)
+def run_interpret(root, input_handler):
+    interpret = init_interpret(root, input_handler)
 
     try:
         interpret.run()
@@ -136,7 +138,7 @@ def main():
     source_handler, input_handler = handle_user_input()
     root = parse_input_xml(source_handler)
 
-    run_interpret(root)
+    run_interpret(root, input_handler)
     close_files(source_handler, input_handler)
 
 

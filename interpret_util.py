@@ -18,9 +18,10 @@ from instruction import Instruction
 class Interpret:
     def __init__(self, root):
         self.root = root
+        self.input_handler = None
         self.labels = {}
         self.order = {}
-        self.runtime_enviroment = {
+        self.runtime_environment = {
             "global_frame": {},
             "local_frames_stack": []
         }
@@ -54,6 +55,9 @@ class Interpret:
             self.order.update({attr_order: root_order})
             root_order += 1
 
+    def set_input_handler(self, input_handler):
+        self.input_handler = input_handler
+
     def run(self):
         for i in range(1, len(self.root) + 1):
             try:
@@ -73,7 +77,7 @@ class Interpret:
                 raise
 
             try:
-                instruction.execute(self.runtime_enviroment)
+                instruction.execute(self.runtime_environment, self.input_handler)
             except InvalidXMLFormat:
                 raise
             except VariableNotExist:

@@ -13,7 +13,7 @@ from instruction_set import inst_set
 from operand import Operand, create_operand
 from custom_exception import InvalidOperandValue, InvalidXMLFormat, FrameNotExist, VariableNotExist, \
     InvalidOperandType, ZeroDivision, UnexpectedInstructionError
-from instruction_util import save_var_to_frame, get_arg_val, check_is_existing_variable
+from instruction_util import save_var_to_frame, get_arg_val, check_is_existing_variable, int_str_2_int
 
 
 class Instruction:
@@ -108,9 +108,9 @@ class Instruction:
         except InvalidXMLFormat:
             raise
 
-    def get_arg_val_two_operands(self, runtime_enviroment):
+    def get_arg_val_two_operands(self, runtime_environment):
         try:
-            arg2_value = get_arg_val(runtime_enviroment, self.arg2)
+            arg2_value = get_arg_val(runtime_environment, self.arg2)
         except InvalidXMLFormat:
             raise
         except VariableNotExist:
@@ -120,10 +120,10 @@ class Instruction:
 
         return arg2_value
 
-    def get_args_vals_three_operands(self, runtime_enviroment):
+    def get_args_vals_three_operands(self, runtime_environment):
         try:
-            arg2_value = get_arg_val(runtime_enviroment, self.arg2)
-            arg3_value = get_arg_val(runtime_enviroment, self.arg3)
+            arg2_value = get_arg_val(runtime_environment, self.arg2)
+            arg3_value = get_arg_val(runtime_environment, self.arg3)
         except InvalidXMLFormat:
             raise
         except VariableNotExist:
@@ -133,13 +133,13 @@ class Instruction:
 
         return arg2_value, arg3_value
 
-    def arithmetic(self, runtime_enviroment):
+    def arithmetic(self, runtime_environment):
         var1_frame = self.arg1.get_var_frame()
         var1_name = self.arg1.get_var_name()
 
         try:
-            check_is_existing_variable(runtime_enviroment, var1_frame, var1_name)
-            arg2_value, arg3_value = self.get_args_vals_three_operands(runtime_enviroment)
+            check_is_existing_variable(runtime_environment, var1_frame, var1_name)
+            arg2_value, arg3_value = self.get_args_vals_three_operands(runtime_environment)
         except InvalidXMLFormat:
             raise
         except VariableNotExist:
@@ -164,15 +164,15 @@ class Instruction:
         else:
             raise UnexpectedInstructionError
 
-        save_var_to_frame(runtime_enviroment, var1_frame, var1_name, res)
+        save_var_to_frame(runtime_environment, var1_frame, var1_name, res)
 
-    def relational(self, runtime_enviroment):
+    def relational(self, runtime_environment):
         var1_frame = self.arg1.get_var_frame()
         var1_name = self.arg1.get_var_name()
 
         try:
-            check_is_existing_variable(runtime_enviroment, var1_frame, var1_name)
-            arg2_value, arg3_value = self.get_args_vals_three_operands(runtime_enviroment)
+            check_is_existing_variable(runtime_environment, var1_frame, var1_name)
+            arg2_value, arg3_value = self.get_args_vals_three_operands(runtime_environment)
         except InvalidXMLFormat:
             raise
         except VariableNotExist:
@@ -225,16 +225,16 @@ class Instruction:
         else:
             raise UnexpectedInstructionError
 
-        save_var_to_frame(runtime_enviroment, var1_frame, var1_name, res)
+        save_var_to_frame(runtime_environment, var1_frame, var1_name, res)
 
-    def boolean(self, runtime_enviroment):
+    def boolean(self, runtime_environment):
         var1_frame = self.arg1.get_var_frame()
         var1_name = self.arg1.get_var_name()
 
         if self.opcode == "NOT":
             try:
-                check_is_existing_variable(runtime_enviroment, var1_frame, var1_name)
-                arg2_value = self.get_arg_val_two_operands(runtime_enviroment)
+                check_is_existing_variable(runtime_environment, var1_frame, var1_name)
+                arg2_value = self.get_arg_val_two_operands(runtime_environment)
             except InvalidXMLFormat:
                 raise
             except VariableNotExist:
@@ -248,8 +248,8 @@ class Instruction:
                 raise InvalidOperandType
         else:
             try:
-                check_is_existing_variable(runtime_enviroment, var1_frame, var1_name)
-                arg2_value, arg3_value = self.get_args_vals_three_operands(runtime_enviroment)
+                check_is_existing_variable(runtime_environment, var1_frame, var1_name)
+                arg2_value, arg3_value = self.get_args_vals_three_operands(runtime_environment)
             except InvalidXMLFormat:
                 raise
             except VariableNotExist:
@@ -267,9 +267,9 @@ class Instruction:
             else:
                 raise InvalidOperandType
 
-        save_var_to_frame(runtime_enviroment, var1_frame, var1_name, res)
+        save_var_to_frame(runtime_environment, var1_frame, var1_name, res)
 
-    def execute(self, runtime_enviroment):
+    def execute(self, runtime_environment, input_handler):
         try:
             if self.opcode == "MOVE":
                 if self.arg2.get_type() == "label":
@@ -278,9 +278,9 @@ class Instruction:
                 var1_frame = self.arg1.get_var_frame()
                 var1_name = self.arg1.get_var_name()
 
-                arg2_value = get_arg_val(runtime_enviroment, self.arg2)
+                arg2_value = get_arg_val(runtime_environment, self.arg2)
 
-                save_var_to_frame(runtime_enviroment, var1_frame, var1_name, arg2_value)
+                save_var_to_frame(runtime_environment, var1_frame, var1_name, arg2_value)
 
             #elif self.opcode == "CREATEFRAME":
             #elif self.opcode == "PUSHFRAME":
@@ -288,51 +288,103 @@ class Instruction:
             elif self.opcode == "DEFVAR":
                 var_frame = self.arg1.get_var_frame()
                 var_name = self.arg1.get_var_name()
-                save_var_to_frame(runtime_enviroment, var_frame, var_name, None)
+                save_var_to_frame(runtime_environment, var_frame, var_name, None)
 
             #elif self.opcode == "CALL":
             #elif self.opcode == "RETURN":
             #elif self.opcode == "PUSHS":
             #elif self.opcode == "POPS":
             elif self.opcode == "ADD":
-                self.arithmetic(runtime_enviroment)
+                self.arithmetic(runtime_environment)
 
             elif self.opcode == "SUB":
-                self.arithmetic(runtime_enviroment)
+                self.arithmetic(runtime_environment)
 
             elif self.opcode == "MUL":
-                self.arithmetic(runtime_enviroment)
+                self.arithmetic(runtime_environment)
 
             elif self.opcode == "IDIV":
-                self.arithmetic(runtime_enviroment)
+                self.arithmetic(runtime_environment)
 
             elif self.opcode == "LT":
-                self.relational(runtime_enviroment)
+                self.relational(runtime_environment)
 
             elif self.opcode == "GT":
-                self.relational(runtime_enviroment)
+                self.relational(runtime_environment)
 
             elif self.opcode == "EQ":
-                self.relational(runtime_enviroment)
+                self.relational(runtime_environment)
 
             elif self.opcode == "AND":
-                self.boolean(runtime_enviroment)
+                self.boolean(runtime_environment)
 
             elif self.opcode == "OR":
-                self.boolean(runtime_enviroment)
+                self.boolean(runtime_environment)
 
             elif self.opcode == "NOT":
-                self.boolean(runtime_enviroment)
+                self.boolean(runtime_environment)
 
             # elif self.opcode == "INT2CHAR":
             # elif self.opcode == "STRI2INT":
-            # elif self.opcode == "READ":
+            elif self.opcode == "READ":
+                # TODO u promennych kde je to resene ulozeni aktualniho datoveho typu asi
+                # datove typy jsou urceny dynamicky obsazenou hodnotou a implicitni konverze,
+                # pokud neni receno jinak jsou zakazany viz zadani
+                input_line = input_handler.readline()
+
+                if input_line[-1] == '\n':
+                    input_line = input_line[:-1]
+
+                var1_frame = self.arg1.get_var_frame()
+                var1_name = self.arg1.get_var_name()
+
+                try:
+                    check_is_existing_variable(runtime_environment, var1_frame, var1_name)
+                    arg2_value = self.get_arg_val_two_operands(runtime_environment)
+                except InvalidXMLFormat:
+                    raise
+                except VariableNotExist:
+                    raise
+                except FrameNotExist:
+                    raise
+
+                if arg2_value == "int":
+                    try:
+                        input_line = int_str_2_int(input_line)
+                    except ValueError:
+                        # TODO zkontrolovat ulozeni nil@nil viz zadani
+                        input_line = None
+                elif arg2_value == "string":
+                    if not isinstance(input_line, str):
+                        #input_line = ""
+                        input_line = None
+                elif arg2_value == "bool":
+                    input_line = input_line.lower()
+
+                    if input_line == "true":
+                        input_line = True
+                    else:
+                        input_line = False
+                else:
+                    raise InvalidXMLFormat
+
+                save_var_to_frame(runtime_environment, var1_frame, var1_name, input_line)
+
             elif self.opcode == "WRITE":
-                val = get_arg_val(runtime_enviroment, self.arg1)
+                val = get_arg_val(runtime_environment, self.arg1)
 
-                #if self.arg1.get_type() == "bool":
+                # TODO zkontrolovat vypis nil@nil jako prazdny retezec
+                # atd viz zadani
 
-                val = str(val)
+                if val is None:
+                    val = ""
+                elif val is True:
+                    val = "true"
+                elif val is False:
+                    val = "false"
+                else:
+                    val = str(val)
+
                 print(val, end='', flush=True)
 
             # elif self.opcode == "CONCAT":
