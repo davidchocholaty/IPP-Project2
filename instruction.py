@@ -108,14 +108,38 @@ class Instruction:
         except InvalidXMLFormat:
             raise
 
+    def get_arg_val_two_operands(self, runtime_enviroment):
+        try:
+            arg2_value = get_arg_val(runtime_enviroment, self.arg2)
+        except InvalidXMLFormat:
+            raise
+        except VariableNotExist:
+            raise
+        except FrameNotExist:
+            raise
+
+        return arg2_value
+
+    def get_args_vals_three_operands(self, runtime_enviroment):
+        try:
+            arg2_value = get_arg_val(runtime_enviroment, self.arg2)
+            arg3_value = get_arg_val(runtime_enviroment, self.arg3)
+        except InvalidXMLFormat:
+            raise
+        except VariableNotExist:
+            raise
+        except FrameNotExist:
+            raise
+
+        return arg2_value, arg3_value
+
     def arithmetic(self, runtime_enviroment):
         var1_frame = self.arg1.get_var_frame()
         var1_name = self.arg1.get_var_name()
 
         try:
             check_is_existing_variable(runtime_enviroment, var1_frame, var1_name)
-            arg2_value = get_arg_val(runtime_enviroment, self.arg2)
-            arg3_value = get_arg_val(runtime_enviroment, self.arg3)
+            arg2_value, arg3_value = self.get_args_vals_three_operands(runtime_enviroment)
         except InvalidXMLFormat:
             raise
         except VariableNotExist:
@@ -139,6 +163,109 @@ class Instruction:
             res = int(arg2_value / arg3_value)
         else:
             raise UnexpectedInstructionError
+
+        save_var_to_frame(runtime_enviroment, var1_frame, var1_name, res)
+
+    def relational(self, runtime_enviroment):
+        var1_frame = self.arg1.get_var_frame()
+        var1_name = self.arg1.get_var_name()
+
+        try:
+            check_is_existing_variable(runtime_enviroment, var1_frame, var1_name)
+            arg2_value, arg3_value = self.get_args_vals_three_operands(runtime_enviroment)
+        except InvalidXMLFormat:
+            raise
+        except VariableNotExist:
+            raise
+        except FrameNotExist:
+            raise
+
+        if self.opcode == "LT":
+            if type(arg2_value) != type(arg3_value):
+                raise InvalidOperandType
+
+            if isinstance(arg2_value, int) or \
+                    isinstance(arg2_value, str) or \
+                    isinstance(arg2_value, bool):
+                res = arg2_value < arg3_value
+            else:
+                raise InvalidOperandType
+
+        elif self.opcode == "GT":
+            if type(arg2_value) != type(arg3_value):
+                raise InvalidOperandType
+
+            if isinstance(arg2_value, int) or \
+                    isinstance(arg2_value, str) or \
+                    isinstance(arg2_value, bool):
+                res = arg2_value > arg3_value
+            else:
+                raise InvalidOperandType
+
+        elif self.opcode == "EQ":
+            if arg2_value == "nil":
+                arg2_value = None
+            if arg3_value == "nil":
+                arg3_value = None
+
+            if arg2_value is not None and \
+                    arg3_value is not None and \
+                    type(arg2_value) != type(arg3_value):
+                raise InvalidOperandType
+
+            if isinstance(arg2_value, int) or \
+                    isinstance(arg2_value, str) or \
+                    isinstance(arg2_value, bool) or \
+                    arg2_value is None or \
+                    arg3_value is None:
+                res = arg2_value == arg3_value
+            else:
+                raise InvalidOperandType
+
+        else:
+            raise UnexpectedInstructionError
+
+        save_var_to_frame(runtime_enviroment, var1_frame, var1_name, res)
+
+    def boolean(self, runtime_enviroment):
+        var1_frame = self.arg1.get_var_frame()
+        var1_name = self.arg1.get_var_name()
+
+        if self.opcode == "NOT":
+            try:
+                check_is_existing_variable(runtime_enviroment, var1_frame, var1_name)
+                arg2_value = self.get_arg_val_two_operands(runtime_enviroment)
+            except InvalidXMLFormat:
+                raise
+            except VariableNotExist:
+                raise
+            except FrameNotExist:
+                raise
+
+            if isinstance(arg2_value, bool):
+                res = not arg2_value
+            else:
+                raise InvalidOperandType
+        else:
+            try:
+                check_is_existing_variable(runtime_enviroment, var1_frame, var1_name)
+                arg2_value, arg3_value = self.get_args_vals_three_operands(runtime_enviroment)
+            except InvalidXMLFormat:
+                raise
+            except VariableNotExist:
+                raise
+            except FrameNotExist:
+                raise
+
+            if isinstance(arg2_value, bool) and isinstance(arg3_value, bool):
+                if self.opcode == "AND":
+                    res = arg2_value and arg3_value
+                elif self.opcode == "OR":
+                    res = arg2_value or arg3_value
+                else:
+                    raise UnexpectedInstructionError
+            else:
+                raise InvalidOperandType
 
         save_var_to_frame(runtime_enviroment, var1_frame, var1_name, res)
 
@@ -179,12 +306,24 @@ class Instruction:
             elif self.opcode == "IDIV":
                 self.arithmetic(runtime_enviroment)
 
-            # elif self.opcode == "LT":
-            # elif self.opcode == "GT":
-            # elif self.opcode == "EQ":
-            # elif self.opcode == "AND":
-            # elif self.opcode == "OR":
-            # elif self.opcode == "NOT":
+            elif self.opcode == "LT":
+                self.relational(runtime_enviroment)
+
+            elif self.opcode == "GT":
+                self.relational(runtime_enviroment)
+
+            elif self.opcode == "EQ":
+                self.relational(runtime_enviroment)
+
+            elif self.opcode == "AND":
+                self.boolean(runtime_enviroment)
+
+            elif self.opcode == "OR":
+                self.boolean(runtime_enviroment)
+
+            elif self.opcode == "NOT":
+                self.boolean(runtime_enviroment)
+
             # elif self.opcode == "INT2CHAR":
             # elif self.opcode == "STRI2INT":
             # elif self.opcode == "READ":

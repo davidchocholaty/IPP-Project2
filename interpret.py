@@ -13,7 +13,7 @@ import sys
 
 from xml.etree.ElementTree import ParseError
 from custom_exception import MultipleOccurenceError, InvalidOperandValue, InvalidXMLFormat, VariableNotExist, \
-    FrameNotExist
+    FrameNotExist, InvalidOperandType, ZeroDivision, UnexpectedInstructionError
 from argument_handler import ArgumentCreator
 from file_handler import FileCreator
 from exit_code import ExitCode
@@ -116,7 +116,15 @@ def run_interpret(root):
         sys.exit(ExitCode.RUNTIME_VAR_NOT_EXISTS.value)
     except FrameNotExist:
         sys.exit(ExitCode.RUNTIME_FRAME_NOT_EXISTS.value)
+    except InvalidOperandType:
+        sys.exit(ExitCode.RUNTIME_WRONG_OPERAND_TYPE.value)
+    except ZeroDivision:
+        sys.exit(ExitCode.RUNTIME_WRONG_OPERAND_VAL.value)
+    except UnexpectedInstructionError:
+        sys.exit(ExitCode.INTERN_ERROR.value)
     # TODO
+
+    # TODO kdyz nebudou sedet cisla order kde to je resene (bude cislo v poradi vynechane)
 
 
 def close_files(source_handler, input_handler):
