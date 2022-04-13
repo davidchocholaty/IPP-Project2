@@ -10,7 +10,8 @@
 ##########################################################################
 
 from custom_exception import MultipleOccurenceError, InvalidOperandValue, InvalidXMLFormat, VariableNotExist, \
-    FrameNotExist, ZeroDivision, InvalidOperandType, UnexpectedInstructionError, ValueNotInRange
+    FrameNotExist, ZeroDivision, InvalidOperandType, UnexpectedInstructionError, ValueNotInRange, InvalidUnicodeValue, \
+    InvalidStringIndex
 from xml.etree.ElementTree import ParseError
 from instruction import Instruction
 
@@ -90,15 +91,20 @@ class Interpret:
                 raise
             except InvalidOperandType:
                 raise
+            except InvalidOperandValue:
+                raise
             except ZeroDivision:
                 raise
             except UnexpectedInstructionError:
                 raise
             except ValueNotInRange:
                 raise
+            except InvalidUnicodeValue:
+                raise
+            except InvalidStringIndex:
+                raise
 
             # Zmena pozice v kodu na LABEL
             position = self.runtime_environment["position"]
             if position != i:
                 i = position
-

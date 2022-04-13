@@ -14,7 +14,8 @@ import sys
 from instruction_set import inst_set
 from operand import Operand, create_operand
 from custom_exception import InvalidOperandValue, InvalidXMLFormat, FrameNotExist, VariableNotExist, \
-    InvalidOperandType, ZeroDivision, UnexpectedInstructionError, ValueNotInRange
+    InvalidOperandType, ZeroDivision, UnexpectedInstructionError, ValueNotInRange, InvalidUnicodeValue, \
+    InvalidStringIndex
 from instruction_util import save_var_to_frame, get_arg_val, check_is_existing_variable, int_str_2_int
 
 
@@ -271,7 +272,9 @@ class Instruction:
 
         save_var_to_frame(runtime_environment, var1_frame, var1_name, res)
 
-    def jump(self, runtime_environment):
+    def jump_instruction(self, runtime_environment):
+        # JUMP nebo JUMPIFEQ nebo JUMPIFNEQ
+
         arg1_value = get_arg_val(runtime_environment, self.arg1)
         run_env_labels = runtime_environment["labels"]
         label_position = run_env_labels[arg1_value]
@@ -326,6 +329,58 @@ class Instruction:
 
             else:
                 raise InvalidOperandType
+
+        else:
+            raise UnexpectedInstructionError
+
+    def convert_instruction(self, runtime_environment):
+        # INT2CHAR nebo STRI2INT
+        var1_frame = self.arg1.get_var_frame()
+        var1_name = self.arg1.get_var_name()
+
+        if self.opcode == "INT2CHAR":
+            try:
+                check_is_existing_variable(runtime_environment, var1_frame, var1_name)
+                arg2_value = self.get_arg_val_two_operands(runtime_environment)
+            except InvalidXMLFormat:
+                raise
+            except VariableNotExist:
+                raise
+            except FrameNotExist:
+                raise
+
+            if not isinstance(arg2_value, int):
+                raise InvalidOperandType
+
+            try:
+                res_value = chr(arg2_value)
+            except ValueError:
+                raise InvalidUnicodeValue
+        elif self.opcode == "STRI2INT":
+            try:
+                check_is_existing_variable(runtime_environment, var1_frame, var1_name)
+                arg2_value, arg3_value = self.get_args_vals_three_operands(runtime_environment)
+            except InvalidXMLFormat:
+                raise
+            except VariableNotExist:
+                raise
+            except FrameNotExist:
+                raise
+
+            if isinstance(arg2_value, str) and isinstance(arg3_value, int):
+                if arg3_value < 0 or arg3_value >= len(arg2_value):
+                    raise InvalidStringIndex
+
+                try:
+                    res_value = ord(arg2_value[arg3_value])
+                except TypeError:
+                    raise InvalidUnicodeValue
+            else:
+                raise InvalidOperandType
+        else:
+            raise UnexpectedInstructionError
+
+        save_var_to_frame(runtime_environment, var1_frame, var1_name, res_value)
 
     def execute(self, runtime_environment, input_handler):
         try:
@@ -382,8 +437,12 @@ class Instruction:
             elif self.opcode == "NOT":
                 self.boolean(runtime_environment)
 
-            # elif self.opcode == "INT2CHAR":
-            # elif self.opcode == "STRI2INT":
+            elif self.opcode == "INT2CHAR":
+                self.convert_instruction(runtime_environment)
+
+            elif self.opcode == "STRI2INT":
+                self.convert_instruction(runtime_environment)
+
             elif self.opcode == "READ":
                 # TODO u promennych kde je to resene ulozeni aktualniho datoveho typu asi
                 # datove typy jsou urceny dynamicky obsazenou hodnotou a implicitni konverze,
@@ -498,13 +557,13 @@ class Instruction:
                     raise InvalidOperandType
 
             elif self.opcode == "JUMP":
-                self.jump(runtime_environment)
+                self.jump_instruction(runtime_environment)
 
             elif self.opcode == "JUMPIFEQ":
-                self.jump(runtime_environment)
+                self.jump_instruction(runtime_environment)
 
             elif self.opcode == "JUMPIFNEQ":
-                self.jump(runtime_environment)
+                self.jump_instruction(runtime_environment)
 
             elif self.opcode == "EXIT":
                 try:
