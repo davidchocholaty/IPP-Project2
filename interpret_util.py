@@ -19,9 +19,10 @@ class Interpret:
     def __init__(self, root):
         self.root = root
         self.input_handler = None
-        self.labels = {}
         self.order = {}
         self.runtime_environment = {
+            "position": 0,
+            "labels": {},
             "global_frame": {},
             "local_frames_stack": []
         }
@@ -36,10 +37,11 @@ class Interpret:
             for i in range(0, len(self.root)):
                 if self.root[i].attrib['opcode'] == "LABEL":
                     for child in self.root[i]:
-                        if child.text in self.labels:
+                        if child.text in self.runtime_environment["labels"]:
                             raise MultipleOccurenceError
 
-                        self.labels.update({child.text: int(self.root[i].attrib['order'])})
+                        self.runtime_environment["labels"].update(
+                            {child.text: int(self.root[i].attrib['order'])})
         except ParseError:
             raise
 
@@ -60,6 +62,8 @@ class Interpret:
 
     def run(self):
         for i in range(1, len(self.root) + 1):
+            self.runtime_environment["position"] = i
+
             try:
                 inst_order = self.order[i]
                 opcode = self.root[inst_order].attrib['opcode'].upper()
@@ -92,4 +96,9 @@ class Interpret:
                 raise
             except ValueNotInRange:
                 raise
+
+            # Zmena pozice v kodu na LABEL
+            position = self.runtime_environment["position"]
+            if position != i:
+                i = position
 

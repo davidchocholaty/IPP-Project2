@@ -218,8 +218,8 @@ class Instruction:
             if isinstance(arg2_value, int) or \
                     isinstance(arg2_value, str) or \
                     isinstance(arg2_value, bool) or \
-                    arg2_value is None or \
-                    arg3_value is None:
+                    arg2_value is None:  # or \
+                # arg3_value is None:
                 res = arg2_value == arg3_value
             else:
                 raise InvalidOperandType
@@ -271,6 +271,62 @@ class Instruction:
 
         save_var_to_frame(runtime_environment, var1_frame, var1_name, res)
 
+    def jump(self, runtime_environment):
+        arg1_value = get_arg_val(runtime_environment, self.arg1)
+        run_env_labels = runtime_environment["labels"]
+        label_position = run_env_labels[arg1_value]
+
+        if self.opcode == "JUMP":
+            try:
+                # Skok na instrukci nasledujici za instrukci LABEL
+                runtime_environment["position"] = int_str_2_int(label_position + 1)
+            except ValueError:
+                raise InvalidOperandValue
+
+        elif self.opcode == "JUMPIFEQ" or self.opcode == "JUMPIFNEQ":
+            try:
+                arg2_value, arg3_value = self.get_args_vals_three_operands(runtime_environment)
+            except InvalidXMLFormat:
+                raise
+            except VariableNotExist:
+                raise
+            except FrameNotExist:
+                raise
+
+            if arg2_value == "nil":
+                arg2_value = None
+            if arg3_value == "nil":
+                arg3_value = None
+
+            if arg2_value is not None and \
+                    arg3_value is not None and \
+                    type(arg2_value) != type(arg3_value):
+                raise InvalidOperandType
+
+            if isinstance(arg2_value, int) or \
+                    isinstance(arg2_value, str) or \
+                    isinstance(arg2_value, bool) or \
+                    arg2_value is None:
+
+                if self.opcode == "JUMPIFEQ":
+                    if arg2_value == arg3_value:
+                        try:
+                            # Skok na instrukci nasledujici za instrukci LABEL
+                            runtime_environment["position"] = int_str_2_int(label_position + 1)
+                        except ValueError:
+                            raise InvalidOperandValue
+                else:
+                    # JUMPIFNEQ
+                    if arg2_value != arg3_value:
+                        try:
+                            # Skok na instrukci nasledujici za instrukci LABEL
+                            runtime_environment["position"] = int_str_2_int(label_position + 1)
+                        except ValueError:
+                            raise InvalidOperandValue
+
+            else:
+                raise InvalidOperandType
+
     def execute(self, runtime_environment, input_handler):
         try:
             if self.opcode == "MOVE":
@@ -284,18 +340,18 @@ class Instruction:
 
                 save_var_to_frame(runtime_environment, var1_frame, var1_name, arg2_value)
 
-            #elif self.opcode == "CREATEFRAME":
-            #elif self.opcode == "PUSHFRAME":
-            #elif self.opcode == "POPFRAME":
+            # elif self.opcode == "CREATEFRAME":
+            # elif self.opcode == "PUSHFRAME":
+            # elif self.opcode == "POPFRAME":
             elif self.opcode == "DEFVAR":
                 var_frame = self.arg1.get_var_frame()
                 var_name = self.arg1.get_var_name()
                 save_var_to_frame(runtime_environment, var_frame, var_name, None)
 
-            #elif self.opcode == "CALL":
-            #elif self.opcode == "RETURN":
-            #elif self.opcode == "PUSHS":
-            #elif self.opcode == "POPS":
+            # elif self.opcode == "CALL":
+            # elif self.opcode == "RETURN":
+            # elif self.opcode == "PUSHS":
+            # elif self.opcode == "POPS":
             elif self.opcode == "ADD":
                 self.arithmetic(runtime_environment)
 
@@ -358,7 +414,7 @@ class Instruction:
                         input_line = None
                 elif arg2_value == "string":
                     if not isinstance(input_line, str):
-                        #input_line = ""
+                        # input_line = ""
                         input_line = None
                 elif arg2_value == "bool":
                     input_line = input_line.lower()
@@ -408,21 +464,48 @@ class Instruction:
                     raise
 
                 if isinstance(arg2_value, int):
-                    # TODO
+                    save_var_to_frame(runtime_environment,
+                                      self.arg1.get_var_frame(),
+                                      self.arg1.get_var_name(),
+                                      "int")
+
                 elif isinstance(arg2_value, bool):
-                    # TODO
+                    save_var_to_frame(runtime_environment,
+                                      self.arg1.get_var_frame(),
+                                      self.arg1.get_var_name(),
+                                      "bool")
+
                 elif isinstance(arg2_value, str):
-                    # TODO
-                elif arg2_value == None:
-                    #TODO
+                    var_type = None
+
+                    if arg2_value == "nil":
+                        var_type = "nil"
+                    else:
+                        var_type = "string"
+
+                    save_var_to_frame(runtime_environment,
+                                      self.arg1.get_var_frame(),
+                                      self.arg1.get_var_name(),
+                                      var_type)
+
+                elif arg2_value is None:
+                    save_var_to_frame(runtime_environment,
+                                      self.arg1.get_var_frame(),
+                                      self.arg1.get_var_name(),
+                                      "nil")
+
                 else:
-                    # TODO error
+                    raise InvalidOperandType
 
+            elif self.opcode == "JUMP":
+                self.jump(runtime_environment)
 
-            # elif self.opcode == "LABEL":
-            # elif self.opcode == "JUMP":
-            # elif self.opcode == "JUMPIFEQ":
-            # elif self.opcode == "JUMPIFNEQ":
+            elif self.opcode == "JUMPIFEQ":
+                self.jump(runtime_environment)
+
+            elif self.opcode == "JUMPIFNEQ":
+                self.jump(runtime_environment)
+
             elif self.opcode == "EXIT":
                 try:
                     arg1_value = get_arg_val(runtime_environment, self.arg1)
@@ -453,7 +536,20 @@ class Instruction:
 
                 sys.stderr.write(arg1_value)
 
-            # elif self.opcode == "BREAK":
+            elif self.opcode == "BREAK":
+                sys.stderr.write("Global frame content:")
+                sys.stderr.write("")
+
+                global_frame_content = runtime_environment["global_frame"]
+
+                for key, value in global_frame_content.items():
+                    sys.stderr.write(key + " : " + value)
+
+                stack_size = len(runtime_environment["local_frames_stack"])
+
+                sys.stderr.write("")
+                sys.stderr.write("Local frames stack actual size:" + str(stack_size))
+
         except InvalidXMLFormat:
             raise
         except VariableNotExist:
@@ -461,6 +557,8 @@ class Instruction:
         except FrameNotExist:
             raise
         except InvalidOperandType:
+            raise
+        except InvalidOperandValue:
             raise
         except ZeroDivision:
             raise
