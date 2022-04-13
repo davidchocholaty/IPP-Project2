@@ -15,7 +15,7 @@ from instruction_set import inst_set
 from operand import Operand, create_operand
 from custom_exception import InvalidOperandValue, InvalidXMLFormat, FrameNotExist, VariableNotExist, \
     InvalidOperandType, ZeroDivision, UnexpectedInstructionError, ValueNotInRange, InvalidUnicodeValue, \
-    InvalidStringIndex
+    InvalidStringIndex, MissingValueError
 from instruction_util import save_var_to_frame, get_arg_val, check_is_existing_variable, int_str_2_int
 
 
@@ -274,10 +274,21 @@ class Instruction:
 
     def jump_instruction(self, runtime_environment):
         # JUMP nebo JUMPIFEQ nebo JUMPIFNEQ
+        try:
+            arg1_value = get_arg_val(runtime_environment, self.arg1)
+        except InvalidXMLFormat:
+            raise
+        except VariableNotExist:
+            raise
+        except FrameNotExist:
+            raise
 
-        arg1_value = get_arg_val(runtime_environment, self.arg1)
         run_env_labels = runtime_environment["labels"]
-        label_position = run_env_labels[arg1_value]
+
+        try:
+            label_position = run_env_labels[arg1_value]
+        except ValueError:
+            raise InvalidOperandValue
 
         if self.opcode == "JUMP":
             try:
@@ -403,8 +414,44 @@ class Instruction:
                 var_name = self.arg1.get_var_name()
                 save_var_to_frame(runtime_environment, var_frame, var_name, None)
 
-            # elif self.opcode == "CALL":
-            # elif self.opcode == "RETURN":
+            elif self.opcode == "CALL":
+                call_stack = runtime_environment["call_stack"]
+                call_stack.append(runtime_environment["position"])
+
+                run_env_labels = runtime_environment["labels"]
+
+                try:
+                    arg1_value = get_arg_val(runtime_environment, self.arg1)
+                except InvalidXMLFormat:
+                    raise
+                except VariableNotExist:
+                    raise
+                except FrameNotExist:
+                    raise
+
+                if not isinstance(arg1_value, str):
+                    raise InvalidXMLFormat
+
+                try:
+                    label_position = run_env_labels[arg1_value]
+                except ValueError:
+                    raise InvalidOperandValue
+
+                try:
+                    runtime_environment["position"] = int_str_2_int(label_position + 1)
+                except ValueError:
+                    raise InvalidOperandValue
+
+            elif self.opcode == "RETURN":
+                call_stack = runtime_environment["call_stack"]
+
+                try:
+                    runtime_environment["position"] = call_stack[len(call_stack) - 1]
+                except ValueError:
+                    raise MissingValueError
+
+                runtime_environment["call_stack"] = call_stack[:-1]
+
             # elif self.opcode == "PUSHS":
             # elif self.opcode == "POPS":
             elif self.opcode == "ADD":

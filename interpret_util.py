@@ -11,7 +11,7 @@
 
 from custom_exception import MultipleOccurenceError, InvalidOperandValue, InvalidXMLFormat, VariableNotExist, \
     FrameNotExist, ZeroDivision, InvalidOperandType, UnexpectedInstructionError, ValueNotInRange, InvalidUnicodeValue, \
-    InvalidStringIndex
+    InvalidStringIndex, MissingValueError
 from xml.etree.ElementTree import ParseError
 from instruction import Instruction
 
@@ -25,7 +25,8 @@ class Interpret:
             "position": 0,
             "labels": {},
             "global_frame": {},
-            "local_frames_stack": []
+            "local_frames_stack": [],
+            "call_stack": []
         }
 
     def is_valid_lang(self):
@@ -102,6 +103,8 @@ class Interpret:
             except InvalidUnicodeValue:
                 raise
             except InvalidStringIndex:
+                raise
+            except MissingValueError:
                 raise
 
             # Zmena pozice v kodu na LABEL

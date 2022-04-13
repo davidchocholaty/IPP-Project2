@@ -63,6 +63,12 @@ class VariableNotExist(Exception):
         super().__init__(self.msg)
 
 
+class MissingValueError(Exception):
+    def __init__(self, msg="Missing value error"):
+        self.msg = msg
+        super().__init__(self.msg)
+
+
 class ZeroDivision(Exception):
     def __init__(self, msg="Zero division"):
         self.msg = msg
