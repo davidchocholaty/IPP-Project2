@@ -9,10 +9,12 @@
 #                                                                        #
 ##########################################################################
 
+import sys
+
 from instruction_set import inst_set
 from operand import Operand, create_operand
 from custom_exception import InvalidOperandValue, InvalidXMLFormat, FrameNotExist, VariableNotExist, \
-    InvalidOperandType, ZeroDivision, UnexpectedInstructionError
+    InvalidOperandType, ZeroDivision, UnexpectedInstructionError, ValueNotInRange
 from instruction_util import save_var_to_frame, get_arg_val, check_is_existing_variable, int_str_2_int
 
 
@@ -391,13 +393,66 @@ class Instruction:
             # elif self.opcode == "STRLEN":
             # elif self.opcode == "GETCHAR":
             # elif self.opcode == "SETCHAR":
-            # elif self.opcode == "TYPE":
+            elif self.opcode == "TYPE":
+                var1_frame = self.arg1.get_var_frame()
+                var1_name = self.arg1.get_var_name()
+
+                try:
+                    check_is_existing_variable(runtime_environment, var1_frame, var1_name)
+                    arg2_value = self.get_arg_val_two_operands(runtime_environment)
+                except InvalidXMLFormat:
+                    raise
+                except VariableNotExist:
+                    raise
+                except FrameNotExist:
+                    raise
+
+                if isinstance(arg2_value, int):
+                    # TODO
+                elif isinstance(arg2_value, bool):
+                    # TODO
+                elif isinstance(arg2_value, str):
+                    # TODO
+                elif arg2_value == None:
+                    #TODO
+                else:
+                    # TODO error
+
+
             # elif self.opcode == "LABEL":
             # elif self.opcode == "JUMP":
             # elif self.opcode == "JUMPIFEQ":
             # elif self.opcode == "JUMPIFNEQ":
-            # elif self.opcode == "EXIT":
-            # elif self.opcode == "DPRINT":
+            elif self.opcode == "EXIT":
+                try:
+                    arg1_value = get_arg_val(runtime_environment, self.arg1)
+                except InvalidXMLFormat:
+                    raise
+                except VariableNotExist:
+                    raise
+                except FrameNotExist:
+                    raise
+
+                if not isinstance(arg1_value, int):
+                    raise InvalidOperandType
+
+                if arg1_value < 0 or arg1_value > 49:
+                    raise ValueNotInRange
+                else:
+                    sys.exit(arg1_value)
+
+            elif self.opcode == "DPRINT":
+                try:
+                    arg1_value = get_arg_val(runtime_environment, self.arg1)
+                except InvalidXMLFormat:
+                    raise
+                except VariableNotExist:
+                    raise
+                except FrameNotExist:
+                    raise
+
+                sys.stderr.write(arg1_value)
+
             # elif self.opcode == "BREAK":
         except InvalidXMLFormat:
             raise

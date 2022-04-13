@@ -33,6 +33,12 @@ class InvalidOperandType(Exception):
         super().__init__(self.msg)
 
 
+class ValueNotInRange(Exception):
+    def __init__(self, msg="Value is not in range"):
+        self.msg = msg
+        super().__init__(self.msg)
+
+
 class FrameNotExist(Exception):
     def __init__(self, msg="Frame not exist"):
         self.msg = msg
