@@ -314,12 +314,12 @@ class Instruction:
 
         try:
             label_position = run_env_labels[arg1_value]
-        except ValueError:
+        except KeyError:
             raise InvalidOperandValue
 
         if self.opcode == "JUMP":
             try:
-                # Skok na instrukci nasledujici za instrukci LABEL
+                # Skok na LABEL
                 runtime_environment["position"] = int_str_2_int(label_position)
             except ValueError:
                 raise InvalidOperandValue
@@ -345,16 +345,16 @@ class Instruction:
                 if self.opcode == "JUMPIFEQ":
                     if arg2_value == arg3_value:
                         try:
-                            # Skok na instrukci nasledujici za instrukci LABEL
-                            runtime_environment["position"] = int_str_2_int(label_position + 1)
+                            # Skok na LABEL
+                            runtime_environment["position"] = int_str_2_int(label_position)
                         except ValueError:
                             raise InvalidOperandValue
                 else:
                     # JUMPIFNEQ
                     if arg2_value != arg3_value:
                         try:
-                            # Skok na instrukci nasledujici za instrukci LABEL
-                            runtime_environment["position"] = int_str_2_int(label_position + 1)
+                            # Skok na LABEL
+                            runtime_environment["position"] = int_str_2_int(label_position)
                         except ValueError:
                             raise InvalidOperandValue
 
@@ -387,6 +387,7 @@ class Instruction:
                 res_value = chr(arg2_value)
             except ValueError:
                 raise InvalidUnicodeValue
+                
         elif self.opcode == "STRI2INT":
             try:
                 check_is_existing_variable(runtime_environment, var1_frame, var1_name)
@@ -418,7 +419,7 @@ class Instruction:
         except InvalidXMLFormat:
             raise
 
-    def execute(self, runtime_environment, input_handler):
+    def execute(self, runtime_environment, input_handler):    
         try:
             if self.opcode == "MOVE":
                 if self.arg2.get_type() == "label":
@@ -427,7 +428,7 @@ class Instruction:
                 var1_frame = self.arg1.get_var_frame()
                 var1_name = self.arg1.get_var_name()
 
-                arg2_value = get_arg_val(runtime_environment, self.arg2)
+                arg2_value = get_arg_val(runtime_environment, self.arg2)               
 
                 save_var_to_frame(runtime_environment, var1_frame, var1_name, arg2_value)
 
@@ -452,7 +453,7 @@ class Instruction:
             elif self.opcode == "DEFVAR":
                 var_frame = self.arg1.get_var_frame()
                 var_name = self.arg1.get_var_name()
-                save_var_to_frame(runtime_environment, var_frame, var_name, None)
+                save_var_to_frame(runtime_environment, var_frame, var_name, None)                
 
             elif self.opcode == "CALL":
                 call_stack = runtime_environment["call_stack"]
@@ -467,7 +468,7 @@ class Instruction:
 
                 try:
                     label_position = run_env_labels[arg1_value]
-                except ValueError:
+                except KeyError:
                     raise InvalidOperandValue
 
                 try:

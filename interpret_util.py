@@ -78,33 +78,40 @@ class Interpret:
         self.input_handler = input_handler
 
     def run(self):
-        skip = False
+        # skip = False
+        keys = list(self.order.keys())
+        idx = 0                
+        length = len(keys)
         
-        for i in self.order.keys():
-            if i < 0:
-                raise KeyError        
-        
-            #self.runtime_environment["position"] = i
-            if skip:
-                if i == self.runtime_environment["position"]:
-                    skip = False
-                else:
-                    continue
+        #for i in self.order.keys():
+        while idx < length:
+            i = keys[idx]
             
+            if i < 0:
+                raise KeyError                
+            
+            # if skip:
+            #    if i == self.runtime_environment["position"]:
+            #        skip = False
+            #    else:
+            #        continue            
+
+            self.runtime_environment["position"] = i
 
             try:
                 inst_order = self.order[i]
+                
             except KeyError:                
                 raise
 
             try:          
-                opcode = self.root[inst_order].attrib['opcode'].upper()
+                opcode = self.root[inst_order].attrib['opcode'].upper()                
                 
                 if self.root[inst_order].tag != "instruction":
                     raise InvalidXMLFormat
                 
                 instruction = Instruction(self.root, opcode)
-            except KeyError:                            
+            except KeyError:
                 raise
             except ParseError:
                 raise
@@ -148,4 +155,10 @@ class Interpret:
             # Zmena pozice v kodu na LABEL            
 
             if self.runtime_environment["position"] != i:
-                skip = True
+                i = self.runtime_environment["position"]
+                idx = keys.index(i)
+                # skip = True                
+                # if self.runtime_environment["position"] < i:
+            else:
+                idx = idx + 1
+                                     
