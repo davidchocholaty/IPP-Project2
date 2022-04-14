@@ -544,9 +544,6 @@ class Instruction:
                 self.convert_instruction(runtime_environment)
 
             elif self.opcode == "READ":
-                # TODO u promennych kde je to resene ulozeni aktualniho datoveho typu asi
-                # datove typy jsou urceny dynamicky obsazenou hodnotou a implicitni konverze,
-                # pokud neni receno jinak jsou zakazany viz zadani
                 input_line = input_handler.readline()
 
                 if input_line[-1] == '\n':
@@ -562,11 +559,9 @@ class Instruction:
                     try:
                         input_line = int_str_2_int(input_line)
                     except ValueError:
-                        # TODO zkontrolovat ulozeni nil@nil viz zadani
                         input_line = None
                 elif arg2_value == "string":
                     if not isinstance(input_line, str):
-                        # input_line = ""
                         input_line = None
                 elif arg2_value == "bool":
                     input_line = input_line.lower()
@@ -582,9 +577,6 @@ class Instruction:
 
             elif self.opcode == "WRITE":
                 val = get_arg_val(runtime_environment, self.arg1)
-
-                # TODO zkontrolovat vypis nil@nil jako prazdny retezec
-                # atd viz zadani
 
                 if val is None:
                     val = ""

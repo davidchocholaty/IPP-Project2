@@ -113,5 +113,6 @@ class Interpret:
 
             # Zmena pozice v kodu na LABEL
             position = self.runtime_environment["position"]
+
             if position != i:
                 i = position

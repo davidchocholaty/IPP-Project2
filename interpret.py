@@ -135,10 +135,7 @@ def run_interpret(root, input_handler):
         sys.exit(ExitCode.RUNTIME_WRONG_STRING_OPERATION.value)
     except UnexpectedInstructionError:
         sys.exit(ExitCode.INTERN_ERROR.value)
-    # TODO
-
-    # TODO kdyz nebudou sedet cisla order kde to je resene (bude cislo v poradi vynechane)
-
+        
 
 def close_files(source_handler, input_handler):
     source_handler.close()

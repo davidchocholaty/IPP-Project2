@@ -152,8 +152,8 @@ def get_not_var_val(arg):
     arg_type = arg.get_type()
 
     if arg_type == "string":
-        # TODO
-        return 0
+        val = arg.get_val()
+
     elif arg_type == "type":
         val = arg.get_val()
 
@@ -176,8 +176,7 @@ def get_not_var_val(arg):
         val = arg.get_val()
 
     else:
-        # TODO error
-        return 0
+        raise InvalidXMLFormat
 
     return val
 

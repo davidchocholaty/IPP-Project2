@@ -78,19 +78,27 @@ class Operand:
 
             elif self.type == "string":
                 self.set_op_val()
-                # TODO jestli je potreba
-                #if self.op_val is not None and "#" in self.op_val:
-                    # TODO error
+
+                if self.op_val is None:
+                    self.op_val = ""
+                elif "#" in self.op_val or search(r"\s", self.op_val):
+                    raise InvalidXMLFormat
+
             elif self.type == "type":
                 self.set_op_val()
+
             elif self.type == "bool":
                 self.set_op_val()
+
             elif self.type == "nil":
                 self.set_op_val()
+
             elif self.type == "int":
                 self.set_op_val()
+
             elif self.type == "label":
                 self.set_op_val()
+
             else:
                 raise InvalidXMLFormat
 
