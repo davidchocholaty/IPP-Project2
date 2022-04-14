@@ -26,7 +26,9 @@ class Interpret:
             "labels": {},
             "global_frame": {},
             "local_frames_stack": [],
-            "call_stack": []
+            "tmp_frame": None,
+            "call_stack": [],
+            "data_stack": []
         }
 
     def is_valid_lang(self):

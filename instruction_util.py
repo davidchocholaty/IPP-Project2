@@ -18,26 +18,34 @@ def save_var_to_frame(runtime_environment, var_frame, var_name, var_act_value):
         if var_name in global_frame.keys():
             global_frame[var_name] = var_act_value
         else:
-            global_frame.update({var_name : var_act_value})
+            global_frame.update({var_name: var_act_value})
 
     elif var_frame == "LF":
         local_frames_stack = runtime_environment["local_frames_stack"]
 
         if len(local_frames_stack) == 0:
-            # TODO error
             raise FrameNotExist
 
-        local_frame = local_frames_stack[-1] # posledni lokalni ramec
+        local_frame = local_frames_stack[-1]  # posledni lokalni ramec
 
         if var_name in local_frame.keys():
             local_frame[var_name] = var_act_value
         else:
             local_frame.update({var_name: var_act_value})
 
-    # elif var_frame == "TF":
-        # TODO
-    # else:
-        # TODO error
+    elif var_frame == "TF":
+        tmp_frame = runtime_environment["tmp_frame"]
+
+        if tmp_frame is None:
+            raise FrameNotExist
+        else:
+            if var_name in tmp_frame.keys():
+                tmp_frame[var_name] = var_act_value
+            else:
+                tmp_frame.update({var_name: var_act_value})
+
+    else:
+        raise InvalidXMLFormat
 
 
 def check_is_existing_variable(runtime_environment, var_frame, var_name):

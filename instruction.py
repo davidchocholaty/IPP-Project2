@@ -111,6 +111,18 @@ class Instruction:
         except InvalidXMLFormat:
             raise
 
+    def get_arg_val_one_operand(self, runtime_environment):
+        try:
+            arg1_value = get_arg_val(runtime_environment, self.arg1)
+        except InvalidXMLFormat:
+            raise
+        except VariableNotExist:
+            raise
+        except FrameNotExist:
+            raise
+
+        return arg1_value
+
     def get_arg_val_two_operands(self, runtime_environment):
         try:
             arg2_value = get_arg_val(runtime_environment, self.arg2)
@@ -167,7 +179,12 @@ class Instruction:
         else:
             raise UnexpectedInstructionError
 
-        save_var_to_frame(runtime_environment, var1_frame, var1_name, res)
+        try:
+            save_var_to_frame(runtime_environment, var1_frame, var1_name, res)
+        except FrameNotExist:
+            raise
+        except InvalidXMLFormat:
+            raise
 
     def relational(self, runtime_environment):
         var1_frame = self.arg1.get_var_frame()
@@ -227,8 +244,12 @@ class Instruction:
 
         else:
             raise UnexpectedInstructionError
-
-        save_var_to_frame(runtime_environment, var1_frame, var1_name, res)
+        try:
+            save_var_to_frame(runtime_environment, var1_frame, var1_name, res)
+        except FrameNotExist:
+            raise
+        except InvalidXMLFormat:
+            raise
 
     def boolean(self, runtime_environment):
         var1_frame = self.arg1.get_var_frame()
@@ -270,7 +291,12 @@ class Instruction:
             else:
                 raise InvalidOperandType
 
-        save_var_to_frame(runtime_environment, var1_frame, var1_name, res)
+        try:
+            save_var_to_frame(runtime_environment, var1_frame, var1_name, res)
+        except FrameNotExist:
+            raise
+        except InvalidXMLFormat:
+            raise
 
     def jump_instruction(self, runtime_environment):
         # JUMP nebo JUMPIFEQ nebo JUMPIFNEQ
@@ -298,14 +324,7 @@ class Instruction:
                 raise InvalidOperandValue
 
         elif self.opcode == "JUMPIFEQ" or self.opcode == "JUMPIFNEQ":
-            try:
-                arg2_value, arg3_value = self.get_args_vals_three_operands(runtime_environment)
-            except InvalidXMLFormat:
-                raise
-            except VariableNotExist:
-                raise
-            except FrameNotExist:
-                raise
+            arg2_value, arg3_value = self.get_args_vals_three_operands(runtime_environment)
 
             if arg2_value == "nil":
                 arg2_value = None
@@ -391,7 +410,12 @@ class Instruction:
         else:
             raise UnexpectedInstructionError
 
-        save_var_to_frame(runtime_environment, var1_frame, var1_name, res_value)
+        try:
+            save_var_to_frame(runtime_environment, var1_frame, var1_name, res_value)
+        except FrameNotExist:
+            raise
+        except InvalidXMLFormat:
+            raise
 
     def execute(self, runtime_environment, input_handler):
         try:
@@ -406,9 +430,24 @@ class Instruction:
 
                 save_var_to_frame(runtime_environment, var1_frame, var1_name, arg2_value)
 
-            # elif self.opcode == "CREATEFRAME":
-            # elif self.opcode == "PUSHFRAME":
-            # elif self.opcode == "POPFRAME":
+            elif self.opcode == "CREATEFRAME":
+                runtime_environment["tmp_frame"] = {}
+
+            elif self.opcode == "PUSHFRAME":
+                tmp_frame = runtime_environment["tmp_frame"]
+
+                if tmp_frame is None:
+                    raise FrameNotExist
+
+                runtime_environment["local_frames_stack"].append(tmp_frame)
+                runtime_environment["tmp_frame"] = None
+
+            elif self.opcode == "POPFRAME":
+                if len(runtime_environment["local_frames_stack"]) == 0:
+                    raise FrameNotExist
+
+                runtime_environment["tmp_frame"] = runtime_environment["local_frames_stack"].pop()
+
             elif self.opcode == "DEFVAR":
                 var_frame = self.arg1.get_var_frame()
                 var_name = self.arg1.get_var_name()
@@ -420,14 +459,7 @@ class Instruction:
 
                 run_env_labels = runtime_environment["labels"]
 
-                try:
-                    arg1_value = get_arg_val(runtime_environment, self.arg1)
-                except InvalidXMLFormat:
-                    raise
-                except VariableNotExist:
-                    raise
-                except FrameNotExist:
-                    raise
+                arg1_value = get_arg_val(runtime_environment, self.arg1)
 
                 if not isinstance(arg1_value, str):
                     raise InvalidXMLFormat
@@ -443,17 +475,37 @@ class Instruction:
                     raise InvalidOperandValue
 
             elif self.opcode == "RETURN":
-                call_stack = runtime_environment["call_stack"]
+                # call_stack = runtime_environment["call_stack"]
 
                 try:
-                    runtime_environment["position"] = call_stack[len(call_stack) - 1]
+                    # runtime_environment["position"] = call_stack[len(call_stack) - 1]
+                    runtime_environment["position"] = runtime_environment["call_stack"].pop()
                 except ValueError:
                     raise MissingValueError
 
-                runtime_environment["call_stack"] = call_stack[:-1]
+                # runtime_environment["call_stack"] = call_stack[:-1]
 
-            # elif self.opcode == "PUSHS":
-            # elif self.opcode == "POPS":
+            elif self.opcode == "PUSHS":
+                if self.arg1.get_type() == "label":
+                    raise InvalidXMLFormat
+
+                arg1_value = self.get_arg_val_one_operand(runtime_environment)
+
+                runtime_environment["data_stack"].append(arg1_value)
+
+            elif self.opcode == "POPS":
+                var1_frame = self.arg1.get_var_frame()
+                var1_name = self.arg1.get_var_name()
+
+                check_is_existing_variable(runtime_environment, var1_frame, var1_name)
+
+                if len(runtime_environment["data_stack"] == 0):
+                    raise MissingValueError
+
+                stack_top = runtime_environment["data_stack"].pop()
+
+                save_var_to_frame(runtime_environment, var1_frame, var1_name, stack_top)
+
             elif self.opcode == "ADD":
                 self.arithmetic(runtime_environment)
 
@@ -502,15 +554,8 @@ class Instruction:
                 var1_frame = self.arg1.get_var_frame()
                 var1_name = self.arg1.get_var_name()
 
-                try:
-                    check_is_existing_variable(runtime_environment, var1_frame, var1_name)
-                    arg2_value = self.get_arg_val_two_operands(runtime_environment)
-                except InvalidXMLFormat:
-                    raise
-                except VariableNotExist:
-                    raise
-                except FrameNotExist:
-                    raise
+                check_is_existing_variable(runtime_environment, var1_frame, var1_name)
+                arg2_value = self.get_arg_val_two_operands(runtime_environment)
 
                 if arg2_value == "int":
                     try:
@@ -559,15 +604,8 @@ class Instruction:
                 var1_frame = self.arg1.get_var_frame()
                 var1_name = self.arg1.get_var_name()
 
-                try:
-                    check_is_existing_variable(runtime_environment, var1_frame, var1_name)
-                    arg2_value = self.get_arg_val_two_operands(runtime_environment)
-                except InvalidXMLFormat:
-                    raise
-                except VariableNotExist:
-                    raise
-                except FrameNotExist:
-                    raise
+                check_is_existing_variable(runtime_environment, var1_frame, var1_name)
+                arg2_value = self.get_arg_val_two_operands(runtime_environment)
 
                 if isinstance(arg2_value, int):
                     save_var_to_frame(runtime_environment,
@@ -613,14 +651,7 @@ class Instruction:
                 self.jump_instruction(runtime_environment)
 
             elif self.opcode == "EXIT":
-                try:
-                    arg1_value = get_arg_val(runtime_environment, self.arg1)
-                except InvalidXMLFormat:
-                    raise
-                except VariableNotExist:
-                    raise
-                except FrameNotExist:
-                    raise
+                arg1_value = get_arg_val(runtime_environment, self.arg1)
 
                 if not isinstance(arg1_value, int):
                     raise InvalidOperandType
@@ -631,14 +662,7 @@ class Instruction:
                     sys.exit(arg1_value)
 
             elif self.opcode == "DPRINT":
-                try:
-                    arg1_value = get_arg_val(runtime_environment, self.arg1)
-                except InvalidXMLFormat:
-                    raise
-                except VariableNotExist:
-                    raise
-                except FrameNotExist:
-                    raise
+                arg1_value = get_arg_val(runtime_environment, self.arg1)
 
                 sys.stderr.write(arg1_value)
 
