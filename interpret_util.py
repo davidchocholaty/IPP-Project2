@@ -77,12 +77,20 @@ class Interpret:
     def set_input_handler(self, input_handler):
         self.input_handler = input_handler
 
-    def run(self):    
+    def run(self):
+        skip = False
+        
         for i in self.order.keys():
             if i < 0:
-                raise KeyError
+                raise KeyError        
         
-            self.runtime_environment["position"] = i
+            #self.runtime_environment["position"] = i
+            if skip:
+                if i == self.runtime_environment["position"]:
+                    skip = False
+                else:
+                    continue
+            
 
             try:
                 inst_order = self.order[i]
@@ -137,8 +145,7 @@ class Interpret:
             except MissingValueError:
                 raise
 
-            # Zmena pozice v kodu na LABEL
-            position = self.runtime_environment["position"]
+            # Zmena pozice v kodu na LABEL            
 
-            if position != i:
-                i = position
+            if self.runtime_environment["position"] != i:
+                skip = True

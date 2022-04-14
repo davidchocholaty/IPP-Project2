@@ -320,7 +320,7 @@ class Instruction:
         if self.opcode == "JUMP":
             try:
                 # Skok na instrukci nasledujici za instrukci LABEL
-                runtime_environment["position"] = int_str_2_int(label_position + 1)
+                runtime_environment["position"] = int_str_2_int(label_position)
             except ValueError:
                 raise InvalidOperandValue
 
