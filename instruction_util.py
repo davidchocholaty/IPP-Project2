@@ -109,7 +109,6 @@ def int_str_2_int(int_val):
 
 
 def get_var_val(runtime_environment, var_frame, var_name):
-    # ?? can_miss_value
     if var_frame == "GF":
         global_frame = runtime_environment["global_frame"]
 

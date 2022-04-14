@@ -70,23 +70,33 @@ class Interpret:
             raise
         except ValueError:
             raise
+            
+        # https://stackoverflow.com/questions/613183/how-do-i-sort-a-dictionary-by-value
+        self.order = dict(sorted(self.order.items(), key=lambda item: item[0]))
 
     def set_input_handler(self, input_handler):
         self.input_handler = input_handler
 
-    def run(self):
-        for i in range(1, len(self.root) + 1):
+    def run(self):    
+        for i in self.order.keys():
+            if i < 0:
+                raise KeyError
+        
             self.runtime_environment["position"] = i
 
             try:
                 inst_order = self.order[i]
+            except KeyError:                
+                raise
+
+            try:          
                 opcode = self.root[inst_order].attrib['opcode'].upper()
                 
                 if self.root[inst_order].tag != "instruction":
                     raise InvalidXMLFormat
                 
                 instruction = Instruction(self.root, opcode)
-            except KeyError:
+            except KeyError:                            
                 raise
             except ParseError:
                 raise

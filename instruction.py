@@ -28,10 +28,10 @@ class Instruction:
         self.arg2 = None
         self.arg3 = None
 
-    def no_arg(self):
-        root_args = self.root[self.opcode]
+    def no_arg(self, inst_order):
+        root_args = self.root[inst_order]
 
-        if len(root_args) >= 0:
+        if len(root_args) > 0:
             raise InvalidXMLFormat
 
     def one_arg(self, inst_order):
@@ -97,7 +97,7 @@ class Instruction:
 
         try:
             if args_cnt == 0:
-                self.no_arg()
+                self.no_arg(inst_order)
             elif args_cnt == 1:
                 self.one_arg(inst_order)
             elif args_cnt == 2:
