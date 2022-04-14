@@ -87,7 +87,7 @@ class Interpret:
         while idx < length:
             i = keys[idx]
             
-            if i < 0:
+            if i <= 0:
                 raise KeyError                
             
             # if skip:
