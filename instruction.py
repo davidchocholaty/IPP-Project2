@@ -457,7 +457,8 @@ class Instruction:
 
             elif self.opcode == "CALL":
                 call_stack = runtime_environment["call_stack"]
-                call_stack.append(runtime_environment["position"])
+                # Ulozi inkrementovanou aktualni pozici
+                call_stack.append(runtime_environment["position"] + 1)
 
                 run_env_labels = runtime_environment["labels"]
 
@@ -473,15 +474,15 @@ class Instruction:
 
                 try:
                     runtime_environment["position"] = int_str_2_int(label_position)
+
                 except ValueError:
                     raise InvalidOperandValue
 
             elif self.opcode == "RETURN":
-                # call_stack = runtime_environment["call_stack"]
-
                 try:
                     # runtime_environment["position"] = call_stack[len(call_stack) - 1]
                     runtime_environment["position"] = runtime_environment["call_stack"].pop()
+
                 except ValueError:
                     raise MissingValueError
 

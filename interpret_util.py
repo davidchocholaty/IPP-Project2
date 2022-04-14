@@ -82,8 +82,8 @@ class Interpret:
         keys = list(self.order.keys())
         idx = 0                
         length = len(keys)
+        last = max(self.order)        
         
-        #for i in self.order.keys():
         while idx < length:
             i = keys[idx]
             
@@ -155,8 +155,11 @@ class Interpret:
             # Zmena pozice v kodu na LABEL            
 
             if self.runtime_environment["position"] != i:
-                i = self.runtime_environment["position"]
-                idx = keys.index(i)
+                if self.runtime_environment["position"] != last + 1:
+                    i = self.runtime_environment["position"]
+                    idx = keys.index(i)
+                else:
+                    idx = length
                 # skip = True                
                 # if self.runtime_environment["position"] < i:
             else:
