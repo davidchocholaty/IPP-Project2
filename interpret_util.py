@@ -11,7 +11,7 @@
 
 from custom_exception import MultipleOccurenceError, InvalidOperandValue, InvalidXMLFormat, VariableNotExist, \
     FrameNotExist, ZeroDivision, InvalidOperandType, UnexpectedInstructionError, ValueNotInRange, InvalidUnicodeValue, \
-    InvalidStringIndex, MissingValueError
+    InvalidStringIndex, MissingValueError, InvalidStringOperation
 from xml.etree.ElementTree import ParseError
 from instruction import Instruction
 
@@ -105,6 +105,8 @@ class Interpret:
             except InvalidUnicodeValue:
                 raise
             except InvalidStringIndex:
+                raise
+            except InvalidStringOperation:
                 raise
             except MissingValueError:
                 raise

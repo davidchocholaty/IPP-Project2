@@ -45,6 +45,12 @@ class InvalidStringIndex(Exception):
         super().__init__(self.msg)
 
 
+class InvalidStringOperation(Exception):
+    def __init__(self, msg="Invalid string index"):
+        self.msg = msg
+        super().__init__(self.msg)
+
+
 class ValueNotInRange(Exception):
     def __init__(self, msg="Value is not in range"):
         self.msg = msg

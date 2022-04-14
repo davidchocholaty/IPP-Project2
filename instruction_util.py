@@ -9,6 +9,8 @@
 #                                                                        #
 ##########################################################################
 
+import re
+
 from custom_exception import InvalidXMLFormat, FrameNotExist, VariableNotExist
 
 
@@ -67,8 +69,25 @@ def check_is_existing_variable(runtime_environment, var_frame, var_name):
             return VariableNotExist
 
     elif var_frame == "TF":
-        # TODO
-        return
+        tmp_frame = runtime_environment["tmp_frame"]
+
+        if tmp_frame is None:
+            raise FrameNotExist
+
+        if var_name not in tmp_frame.keys():
+            return VariableNotExist
+
+
+# https://stackoverflow.com/questions/21300996/process-decimal-escape-in-string
+def replace(match):
+    return chr(int(match.group(1)))
+
+
+def process_decimal_escape(string_value):
+    regex = re.compile(r"\\(\d{1,3})")
+    new_value = regex.sub(replace, string_value)
+
+    return new_value
 
 
 def bool_str_2_bool(bool_val):
@@ -113,8 +132,16 @@ def get_var_val(runtime_environment, var_frame, var_name):
         var_value = local_frame[var_name]
 
     elif var_frame == "TF":
-        # TODO
-        return 0
+        tmp_frame = runtime_environment["tmp_frame"]
+
+        if tmp_frame is None:
+            raise FrameNotExist
+
+        if var_name not in tmp_frame.keys():
+            return VariableNotExist
+
+        var_value = tmp_frame[var_name]
+
     else:
         raise InvalidXMLFormat
 

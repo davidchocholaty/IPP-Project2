@@ -15,8 +15,9 @@ from instruction_set import inst_set
 from operand import Operand, create_operand
 from custom_exception import InvalidOperandValue, InvalidXMLFormat, FrameNotExist, VariableNotExist, \
     InvalidOperandType, ZeroDivision, UnexpectedInstructionError, ValueNotInRange, InvalidUnicodeValue, \
-    InvalidStringIndex, MissingValueError
-from instruction_util import save_var_to_frame, get_arg_val, check_is_existing_variable, int_str_2_int
+    InvalidStringIndex, MissingValueError, InvalidStringOperation
+from instruction_util import save_var_to_frame, get_arg_val, check_is_existing_variable, int_str_2_int, \
+    process_decimal_escape
 
 
 class Instruction:
@@ -593,13 +594,105 @@ class Instruction:
                     val = "false"
                 else:
                     val = str(val)
+                    val = process_decimal_escape(val)
 
                 print(val, end='', flush=True)
 
-            # elif self.opcode == "CONCAT":
-            # elif self.opcode == "STRLEN":
-            # elif self.opcode == "GETCHAR":
-            # elif self.opcode == "SETCHAR":
+            elif self.opcode == "CONCAT":
+                var1_frame = self.arg1.get_var_frame()
+                var1_name = self.arg1.get_var_name()
+
+                check_is_existing_variable(runtime_environment, var1_frame, var1_name)
+                arg2_value, arg3_value = self.get_args_vals_three_operands(runtime_environment)
+
+                if not isinstance(arg2_value, str):
+                    if self.arg2.get_type() == "var":
+                        raise MissingValueError
+                    if arg2_value is None and isinstance(arg3_value, str):
+                        concatenated = arg3_value
+                    else:
+                        raise InvalidOperandType
+
+                elif not isinstance(arg3_value, str):
+                    if self.arg3.get_type() == "var":
+                        raise MissingValueError
+                    if arg3_value is None and isinstance(arg2_value, str):
+                        concatenated = arg2_value
+                    else:
+                        raise InvalidOperandType
+                else:
+                    # Oba operandy jsou retezce.
+                    concatenated = arg2_value + arg3_value
+
+                save_var_to_frame(runtime_environment, var1_frame, var1_name, concatenated)
+
+            elif self.opcode == "STRLEN":
+                var1_frame = self.arg1.get_var_frame()
+                var1_name = self.arg1.get_var_name()
+
+                check_is_existing_variable(runtime_environment, var1_frame, var1_name)
+                arg2_value = self.get_arg_val_two_operands(runtime_environment)
+
+                if isinstance(arg2_value, str):
+                    arg2_value = process_decimal_escape(arg2_value)
+                    length = len(arg2_value)
+                elif arg2_value is None:
+                    length = 0
+                else:
+                    raise InvalidOperandType
+
+                save_var_to_frame(runtime_environment, var1_frame, var1_name, length)
+
+            elif self.opcode == "GETCHAR":
+                var1_frame = self.arg1.get_var_frame()
+                var1_name = self.arg1.get_var_name()
+
+                check_is_existing_variable(runtime_environment, var1_frame, var1_name)
+                arg2_value, arg3_value = self.get_args_vals_three_operands(runtime_environment)
+
+                if isinstance(arg2_value, str) and isinstance(arg3_value, int):
+                    if arg3_value < 0 or arg3_value >= len(arg2_value):
+                        raise InvalidStringIndex
+
+                    character = arg2_value[arg3_value]
+
+                else:
+                    raise InvalidOperandType
+
+                save_var_to_frame(runtime_environment, var1_frame, var1_name, character)
+
+            elif self.opcode == "SETCHAR":
+                var1_frame = self.arg1.get_var_frame()
+                var1_name = self.arg1.get_var_name()
+
+                check_is_existing_variable(runtime_environment, var1_frame, var1_name)
+                var1_value = get_arg_val(runtime_environment, self.arg1)
+                arg2_value, arg3_value = self.get_args_vals_three_operands(runtime_environment)
+
+                if isinstance(var1_value, str):
+                    if isinstance(arg2_value, int):
+                        if isinstance(arg3_value, str):
+                            if arg2_value < 0 or arg2_value >= len(var1_value):
+                                raise InvalidStringIndex
+
+                            # https://stackoverflow.com/questions/1228299/changing-one-character-in-a-string
+                            var1_value = list(var1_value)
+                            var1_value[arg2_value] = arg3_value[0]
+                            var1_value = "".join(var1_value)
+
+                        else:
+                            if arg3_value is None or arg3_value == "":
+                                raise InvalidStringOperation
+                            else:
+                                raise InvalidOperandType
+
+                    else:
+                        raise InvalidOperandType
+                else:
+                    raise InvalidStringOperation
+
+                save_var_to_frame(runtime_environment, var1_frame, var1_name, var1_value)
+
             elif self.opcode == "TYPE":
                 var1_frame = self.arg1.get_var_frame()
                 var1_name = self.arg1.get_var_name()

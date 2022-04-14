@@ -14,7 +14,7 @@ import sys
 from xml.etree.ElementTree import ParseError
 from custom_exception import MultipleOccurenceError, InvalidOperandValue, InvalidXMLFormat, VariableNotExist, \
     FrameNotExist, InvalidOperandType, ZeroDivision, UnexpectedInstructionError, ValueNotInRange, InvalidUnicodeValue, \
-    InvalidStringIndex, MissingValueError
+    InvalidStringIndex, MissingValueError, InvalidStringOperation
 from argument_handler import ArgumentCreator
 from file_handler import FileCreator
 from exit_code import ExitCode
@@ -130,6 +130,8 @@ def run_interpret(root, input_handler):
     except InvalidUnicodeValue:
         sys.exit(ExitCode.RUNTIME_WRONG_STRING_OPERATION.value)
     except InvalidStringIndex:
+        sys.exit(ExitCode.RUNTIME_WRONG_STRING_OPERATION.value)
+    except InvalidStringOperation:
         sys.exit(ExitCode.RUNTIME_WRONG_STRING_OPERATION.value)
     except UnexpectedInstructionError:
         sys.exit(ExitCode.INTERN_ERROR.value)
