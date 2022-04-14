@@ -472,7 +472,7 @@ class Instruction:
                     raise InvalidOperandValue
 
                 try:
-                    runtime_environment["position"] = int_str_2_int(label_position + 1)
+                    runtime_environment["position"] = int_str_2_int(label_position)
                 except ValueError:
                     raise InvalidOperandValue
 
@@ -501,7 +501,7 @@ class Instruction:
 
                 check_is_existing_variable(runtime_environment, var1_frame, var1_name)
 
-                if len(runtime_environment["data_stack"] == 0):
+                if len(runtime_environment["data_stack"]) == 0:
                     raise MissingValueError
 
                 stack_top = runtime_environment["data_stack"].pop()
@@ -722,7 +722,7 @@ class Instruction:
                     save_var_to_frame(runtime_environment,
                                       self.arg1.get_var_frame(),
                                       self.arg1.get_var_name(),
-                                      "nil")
+                                      "")
 
                 else:
                     raise InvalidOperandType
