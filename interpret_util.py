@@ -48,18 +48,28 @@ class Interpret:
                             {child.text: int(self.root[i].attrib['order'])})
         except ParseError:
             raise
+        except KeyError:
+            raise
 
     def set_order(self):
         root_order = 0
 
-        for i in self.root:
-            attr_order = int(i.attrib['order'])
+        try:
+            for i in self.root:
+                attr_order = int(i.attrib['order'])
 
-            if attr_order in self.order.keys():
-                raise MultipleOccurenceError
+                if attr_order in self.order.keys():
+                    raise MultipleOccurenceError
 
-            self.order.update({attr_order: root_order})
-            root_order += 1
+                self.order.update({attr_order: root_order})
+                root_order += 1
+
+        except MultipleOccurenceError:
+            raise
+        except KeyError:
+            raise
+        except ValueError:
+            raise
 
     def set_input_handler(self, input_handler):
         self.input_handler = input_handler
@@ -71,10 +81,16 @@ class Interpret:
             try:
                 inst_order = self.order[i]
                 opcode = self.root[inst_order].attrib['opcode'].upper()
+                
+                if self.root[inst_order].tag != "instruction":
+                    raise InvalidXMLFormat
+                
                 instruction = Instruction(self.root, opcode)
             except KeyError:
                 raise
             except ParseError:
+                raise
+            except InvalidXMLFormat:
                 raise
 
             try:

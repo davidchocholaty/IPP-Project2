@@ -80,6 +80,9 @@ def parse_input_xml(source_handler):
     except ParseError:
         sys.exit(ExitCode.WRONG_XML_FORMAT.value)
 
+    if root.tag != "program":
+        sys.exit(ExitCode.WRONG_XML_STRUCTURE.value)        
+
     return root
 
 
@@ -95,11 +98,17 @@ def init_interpret(root, input_handler):
         sys.exit(ExitCode.SEMANTIC_CHECK_ERROR.value)
     except ParseError:
         sys.exit(ExitCode.WRONG_XML_STRUCTURE.value)
+    except KeyError:
+        sys.exit(ExitCode.WRONG_XML_STRUCTURE.value)        
 
     try:
         interpret.set_order()
     except MultipleOccurenceError:
         sys.exit(ExitCode.WRONG_XML_STRUCTURE.value)
+    except KeyError:
+        sys.exit(ExitCode.WRONG_XML_STRUCTURE.value)
+    except ValueError:
+        sys.exit(ExitCode.WRONG_XML_STRUCTURE.value)            
 
     interpret.set_input_handler(input_handler)
 
@@ -111,6 +120,10 @@ def run_interpret(root, input_handler):
 
     try:
         interpret.run()
+    except KeyError:
+        sys.exit(ExitCode.WRONG_XML_STRUCTURE.value)    
+    except ParseError:    
+        sys.exit(ExitCode.WRONG_XML_STRUCTURE.value)    
     except InvalidOperandValue:
         sys.exit(ExitCode.SEMANTIC_CHECK_ERROR.value)
     except InvalidXMLFormat:
