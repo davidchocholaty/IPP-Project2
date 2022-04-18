@@ -2,10 +2,10 @@
 #                                                                        #
 # Soubor: interpret.py                                                   #
 # Vytvoren: 2022-03-30                                                   #
-# Posledni zmena: 2022-03-30                                             #
+# Posledni zmena: 2022-04-19                                             #
 # Autor: David Chocholaty <xchoch09@stud.fit.vutbr.cz>                   #
 # Projekt: Uloha 2 pro predmet IPP                                       #
-# Popis: Hlavni skript interpreteru pro jazyk IPPcode22                  #
+# Popis: Skript se tridou reprezentujici instrukci                       #
 #                                                                        #
 ##########################################################################
 
@@ -19,7 +19,7 @@ from custom_exception import InvalidOperandValue, InvalidXMLFormat, FrameNotExis
 from instruction_util import save_var_to_frame, get_arg_val, check_is_existing_variable, int_str_2_int, \
     process_decimal_escape
 
-
+# Trida reprezentujici instrukci.
 class Instruction:
     def __init__(self, root, opcode):
         self.root = root
@@ -28,12 +28,14 @@ class Instruction:
         self.arg2 = None
         self.arg3 = None
 
+    # Instrukce bez argumentu.
     def no_arg(self, inst_order):
         root_args = self.root[inst_order]
 
         if len(root_args) > 0:
             raise InvalidXMLFormat
 
+    # Instrukce s jednim argumentem.
     def one_arg(self, inst_order):
         root_args = self.root[inst_order]
 
@@ -50,6 +52,7 @@ class Instruction:
         else:
             raise InvalidXMLFormat
 
+    # Instrukce se dvema argumenty.
     def two_args(self, inst_order):
         root_args = self.root[inst_order]
 
@@ -68,6 +71,7 @@ class Instruction:
         else:
             raise InvalidXMLFormat
 
+    # Instrukce se tremi argumenty.
     def three_args(self, inst_order):
         root_args = self.root[inst_order]
 
@@ -88,6 +92,7 @@ class Instruction:
         else:
             raise InvalidXMLFormat
 
+    # Zpracovani argumentu instrukce.
     def parse_instruction(self, inst_order):
         if self.opcode in inst_set:
             inst_args = inst_set[self.opcode]
@@ -112,6 +117,7 @@ class Instruction:
         except InvalidXMLFormat:
             raise
 
+    # Ziskani hodnoty argumentu pro instrukci s jednim argumentem.
     def get_arg_val_one_operand(self, runtime_environment):
         try:
             arg1_value = get_arg_val(runtime_environment, self.arg1)
@@ -124,6 +130,7 @@ class Instruction:
 
         return arg1_value
 
+    # Ziskani hodnoty argumentu pro instrukci se dvema argumenty.
     def get_arg_val_two_operands(self, runtime_environment):
         try:
             arg2_value = get_arg_val(runtime_environment, self.arg2)
@@ -136,6 +143,7 @@ class Instruction:
 
         return arg2_value
 
+    # Ziskani hodnoty argumentu pro instrukci se tremi argumenty.
     def get_args_vals_three_operands(self, runtime_environment):
         try:
             arg2_value = get_arg_val(runtime_environment, self.arg2)
@@ -149,6 +157,7 @@ class Instruction:
 
         return arg2_value, arg3_value
 
+    # Zpracovani aritmetickych instrukci.
     def arithmetic(self, runtime_environment):
         var1_frame = self.arg1.get_var_frame()
         var1_name = self.arg1.get_var_name()
@@ -187,6 +196,7 @@ class Instruction:
         except InvalidXMLFormat:
             raise
 
+    # Zpracovani relacnich instrukci.
     def relational(self, runtime_environment):
         var1_frame = self.arg1.get_var_frame()
         var1_name = self.arg1.get_var_name()
@@ -252,6 +262,7 @@ class Instruction:
         except InvalidXMLFormat:
             raise
 
+    # Zpracovani booleovskych instrukci.
     def boolean(self, runtime_environment):
         var1_frame = self.arg1.get_var_frame()
         var1_name = self.arg1.get_var_name()
@@ -299,6 +310,7 @@ class Instruction:
         except InvalidXMLFormat:
             raise
 
+    # Zpracovani skokovych instrukci.
     def jump_instruction(self, runtime_environment):
         # JUMP nebo JUMPIFEQ nebo JUMPIFNEQ
         try:
@@ -364,6 +376,7 @@ class Instruction:
         else:
             raise UnexpectedInstructionError
 
+    # Zpracovani prevodnich instrukci.
     def convert_instruction(self, runtime_environment):
         # INT2CHAR nebo STRI2INT
         var1_frame = self.arg1.get_var_frame()
@@ -419,8 +432,10 @@ class Instruction:
         except InvalidXMLFormat:
             raise
 
+    # Vyhodnoceni a provedeni instrukce.
     def execute(self, runtime_environment, input_handler):    
         try:
+            # MOVE ⟨var⟩ ⟨symb⟩
             if self.opcode == "MOVE":
                 if self.arg2.get_type() == "label":
                     raise InvalidXMLFormat
@@ -431,9 +446,11 @@ class Instruction:
 
                 save_var_to_frame(runtime_environment, var1_frame, var1_name, arg2_value)
 
+            # CREATEFRAME 
             elif self.opcode == "CREATEFRAME":
                 runtime_environment["tmp_frame"] = {}
 
+            # PUSHFRAME
             elif self.opcode == "PUSHFRAME":
                 tmp_frame = runtime_environment["tmp_frame"]
 
@@ -443,17 +460,20 @@ class Instruction:
                 runtime_environment["local_frames_stack"].append(tmp_frame)
                 runtime_environment["tmp_frame"] = None
 
+            # POPFRAME
             elif self.opcode == "POPFRAME":
                 if len(runtime_environment["local_frames_stack"]) == 0:
                     raise FrameNotExist
 
                 runtime_environment["tmp_frame"] = runtime_environment["local_frames_stack"].pop()
-
+            
+            # DEFVAR <var>
             elif self.opcode == "DEFVAR":
                 var_frame = self.arg1.get_var_frame()
                 var_name = self.arg1.get_var_name()
                 save_var_to_frame(runtime_environment, var_frame, var_name, None)                
 
+            # CALL <label>
             elif self.opcode == "CALL":
                 call_stack = runtime_environment["call_stack"]
                 # Ulozi inkrementovanou aktualni pozici
@@ -477,9 +497,9 @@ class Instruction:
                 except ValueError:
                     raise InvalidOperandValue
 
+            # RETURN
             elif self.opcode == "RETURN":
                 try:
-                    # runtime_environment["position"] = call_stack[len(call_stack) - 1]
                     runtime_environment["position"] = runtime_environment["call_stack"].pop()
 
                 except ValueError:
@@ -487,8 +507,7 @@ class Instruction:
                 except IndexError:
                     raise MissingValueError
 
-                # runtime_environment["call_stack"] = call_stack[:-1]
-
+            # PUSHS <symb>
             elif self.opcode == "PUSHS":
                 if self.arg1.get_type() == "label":
                     raise InvalidXMLFormat
@@ -500,6 +519,7 @@ class Instruction:
 
                 runtime_environment["data_stack"].append(arg1_value)
 
+            # POPS <var>
             elif self.opcode == "POPS":
                 var1_frame = self.arg1.get_var_frame()
                 var1_name = self.arg1.get_var_name()
@@ -516,42 +536,55 @@ class Instruction:
 
                 save_var_to_frame(runtime_environment, var1_frame, var1_name, stack_top)
 
+            # ADD <var> <symb1> <symb2>
             elif self.opcode == "ADD":
                 self.arithmetic(runtime_environment)
 
+            # SUB <var> <symb1> <symb2>            
             elif self.opcode == "SUB":
                 self.arithmetic(runtime_environment)
 
+            # MUL <var> <symb1> <symb2>
             elif self.opcode == "MUL":
                 self.arithmetic(runtime_environment)
 
+            # IDIV <var> <symb1> <symb2>
             elif self.opcode == "IDIV":
                 self.arithmetic(runtime_environment)
 
+            # LT <var> <symb1> <symb2>
             elif self.opcode == "LT":
                 self.relational(runtime_environment)
 
+            # GT <var> <symb1> <symb2>
             elif self.opcode == "GT":
                 self.relational(runtime_environment)
 
+            # EQ <var> <symb1> <symb2>
             elif self.opcode == "EQ":
                 self.relational(runtime_environment)
 
+            # AND <var> <symb1> <symb2>
             elif self.opcode == "AND":
                 self.boolean(runtime_environment)
 
+            # OR <var> <symb1> <symb2>
             elif self.opcode == "OR":
                 self.boolean(runtime_environment)
 
+            # NOT <var> <symb1> <symb2>
             elif self.opcode == "NOT":
                 self.boolean(runtime_environment)
 
+            # INT2CHAR <var> <symb>
             elif self.opcode == "INT2CHAR":
                 self.convert_instruction(runtime_environment)
 
+            # STRI2INT <var> <symb1> <symb2>
             elif self.opcode == "STRI2INT":
                 self.convert_instruction(runtime_environment)
 
+            # READ <var> <type>
             elif self.opcode == "READ":
                 input_line = input_handler.readline()
 
@@ -587,6 +620,7 @@ class Instruction:
 
                 save_var_to_frame(runtime_environment, var1_frame, var1_name, input_line)
 
+            # WRITE <symb>
             elif self.opcode == "WRITE":
                 val = get_arg_val(runtime_environment, self.arg1)
 
@@ -604,6 +638,7 @@ class Instruction:
 
                 print(val, end='', flush=True)
 
+            # CONCAT <var> <symb1> <symb2>
             elif self.opcode == "CONCAT":
                 var1_frame = self.arg1.get_var_frame()
                 var1_name = self.arg1.get_var_name()
@@ -632,6 +667,7 @@ class Instruction:
 
                 save_var_to_frame(runtime_environment, var1_frame, var1_name, concatenated)
 
+            # STRLEN <var> <symb>
             elif self.opcode == "STRLEN":
                 var1_frame = self.arg1.get_var_frame()
                 var1_name = self.arg1.get_var_name()
@@ -649,6 +685,7 @@ class Instruction:
 
                 save_var_to_frame(runtime_environment, var1_frame, var1_name, length)
 
+            # GETCHAR <var> <symb1> <symb2>
             elif self.opcode == "GETCHAR":
                 var1_frame = self.arg1.get_var_frame()
                 var1_name = self.arg1.get_var_name()
@@ -667,6 +704,7 @@ class Instruction:
 
                 save_var_to_frame(runtime_environment, var1_frame, var1_name, character)
 
+            # SETCHAR <var> <symb1> <symb2>
             elif self.opcode == "SETCHAR":
                 var1_frame = self.arg1.get_var_frame()
                 var1_name = self.arg1.get_var_name()
@@ -681,7 +719,6 @@ class Instruction:
                             if arg2_value < 0 or arg2_value >= len(var1_value):
                                 raise InvalidStringIndex
 
-                            # https://stackoverflow.com/questions/1228299/changing-one-character-in-a-string
                             try:
                                 var1_value = list(var1_value)
                                 var1_value[arg2_value] = arg3_value[0]
@@ -702,6 +739,7 @@ class Instruction:
 
                 save_var_to_frame(runtime_environment, var1_frame, var1_name, var1_value)
 
+            # TYPE <var> <symb>
             elif self.opcode == "TYPE":
                 var1_frame = self.arg1.get_var_frame()
                 var1_name = self.arg1.get_var_name()
@@ -743,15 +781,19 @@ class Instruction:
                 else:
                     raise InvalidOperandType
 
+            # JUMP <label>
             elif self.opcode == "JUMP":
                 self.jump_instruction(runtime_environment)
 
+            # JUMPIFEQ <label> <symb1> <symb2>
             elif self.opcode == "JUMPIFEQ":
                 self.jump_instruction(runtime_environment)
 
+            # JUMPIFNEQ <label> <symb1> <symb2>
             elif self.opcode == "JUMPIFNEQ":
                 self.jump_instruction(runtime_environment)
 
+            # EXIT <symb>
             elif self.opcode == "EXIT":
                 arg1_value = get_arg_val(runtime_environment, self.arg1)
 
@@ -763,11 +805,13 @@ class Instruction:
                 else:
                     sys.exit(arg1_value)
 
+            # DPRINT <symb>
             elif self.opcode == "DPRINT":
                 arg1_value = get_arg_val(runtime_environment, self.arg1)
 
                 sys.stderr.write(arg1_value)
 
+            # BREAK
             elif self.opcode == "BREAK":
                 sys.stderr.write("Global frame content:")
                 sys.stderr.write("")

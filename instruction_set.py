@@ -1,11 +1,11 @@
 ##########################################################################
 #                                                                        #
-# Soubor: interpret.py                                                   #
+# Soubor: instruction_set.py                                             #
 # Vytvoren: 2022-03-30                                                   #
 # Posledni zmena: 2022-03-30                                             #
 # Autor: David Chocholaty <xchoch09@stud.fit.vutbr.cz>                   #
 # Projekt: Uloha 2 pro predmet IPP                                       #
-# Popis: Hlavni skript interpreteru pro jazyk IPPcode22                  #
+# Popis: Sada instrukci jazyka IPPcode22                                 #
 #                                                                        #
 ##########################################################################
 
@@ -18,10 +18,10 @@ inst_set = {
     'DEFVAR': ['var'],
     'CALL': ['label'],
     'RETURN': [],
-    # Prace s datovym zasobnikem */
+    # Prace s datovym zasobnikem
     'PUSHS': ['symb'],
     'POPS': ['var'],
-    # Aritmeticke, relacni, booleovske a konverzni instrukce */
+    # Aritmeticke, relacni, booleovske a konverzni instrukce
     'ADD': ['var', 'symb', 'symb'],
     'SUB': ['var', 'symb', 'symb'],
     'MUL': ['var', 'symb', 'symb'],
@@ -34,23 +34,23 @@ inst_set = {
     'NOT': ['var', 'symb'],
     'INT2CHAR': ['var', 'symb'],
     'STRI2INT': ['var', 'symb', 'symb'],
-    # Vstupne vystupni instrukce */
+    # Vstupne vystupni instrukce
     'READ': ['var', 'type'],
     'WRITE': ['symb'],
-    # Prace s retezci */
+    # Prace s retezci
     'CONCAT': ['var', 'symb', 'symb'],
     'STRLEN': ['var', 'symb'],
     'GETCHAR': ['var', 'symb', 'symb'],
     'SETCHAR': ['var', 'symb', 'symb'],
-    # Prace s typy */
+    # Prace s typy
     'TYPE': ['var', 'symb'],
-    # Instrukce pro rizeni toku programu */
+    # Instrukce pro rizeni toku programu
     'LABEL': ['label'],
     'JUMP': ['label'],
     'JUMPIFEQ': ['label', 'symb', 'symb'],
     'JUMPIFNEQ': ['label', 'symb', 'symb'],
     'EXIT': ['symb'],
-    # Ladici instrukce */
+    # Ladici instrukce
     'DPRINT': ['symb'],
     'BREAK': []
 }

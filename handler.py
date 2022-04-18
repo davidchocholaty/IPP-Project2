@@ -2,7 +2,7 @@
 #                                                                        #
 # Soubor: handler.py                                                     #
 # Vytvoren: 2022-03-28                                                   #
-# Posledni zmena: 2022-03-28                                             #
+# Posledni zmena: 2022-04-19                                             #
 # Autor: David Chocholaty <xchoch09@stud.fit.vutbr.cz>                   #
 # Projekt: Uloha 2 pro predmet IPP                                       #
 # Popis:                                                                 #
@@ -10,9 +10,6 @@
 ##########################################################################
 
 from abc import ABC, abstractmethod
-
-# https://sourcemaking.com/design_patterns/factory_method/python/1
-# https://refactoring.guru/design-patterns/factory-method/python/example
 
 
 class Creator(ABC):

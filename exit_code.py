@@ -1,17 +1,17 @@
 ##########################################################################
 #                                                                        #
-# Soubor: interpret.py                                                   #
+# Soubor: exit_code.py                                                   #
 # Vytvoren: 2022-03-28                                                   #
-# Posledni zmena: 2022-03-30                                             #
+# Posledni zmena: 2022-04-19                                             #
 # Autor: David Chocholaty <xchoch09@stud.fit.vutbr.cz>                   #
 # Projekt: Uloha 2 pro predmet IPP                                       #
-# Popis: Hlavni skript interpreteru pro jazyk IPPcode22                  #
+# Popis: Skript s chybovymi kody interpreteru                            #
 #                                                                        #
 ##########################################################################
 
 from enum import Enum
 
-
+# Chybove kody interpreteru.
 class ExitCode(Enum):
     EXIT_SUCCESS = 0
     WRONG_OPTION = 10
