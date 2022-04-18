@@ -426,8 +426,7 @@ class Instruction:
                     raise InvalidXMLFormat
 
                 var1_frame = self.arg1.get_var_frame()
-                var1_name = self.arg1.get_var_name()
-
+                var1_name = self.arg1.get_var_name()                
                 arg2_value = get_arg_val(runtime_environment, self.arg2)               
 
                 save_var_to_frame(runtime_environment, var1_frame, var1_name, arg2_value)
@@ -707,17 +706,17 @@ class Instruction:
                 check_is_existing_variable(runtime_environment, var1_frame, var1_name)
                 arg2_value = self.get_arg_val_two_operands(runtime_environment)
 
-                if isinstance(arg2_value, int):
-                    save_var_to_frame(runtime_environment,
-                                      self.arg1.get_var_frame(),
-                                      self.arg1.get_var_name(),
-                                      "int")
-
-                elif isinstance(arg2_value, bool):
+                if isinstance(arg2_value, bool):
                     save_var_to_frame(runtime_environment,
                                       self.arg1.get_var_frame(),
                                       self.arg1.get_var_name(),
                                       "bool")
+
+                elif isinstance(arg2_value, int):
+                    save_var_to_frame(runtime_environment,
+                                      self.arg1.get_var_frame(),
+                                      self.arg1.get_var_name(),
+                                      "int")                
 
                 elif isinstance(arg2_value, str):
                     var_type = None

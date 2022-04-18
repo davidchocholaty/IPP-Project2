@@ -137,7 +137,7 @@ def get_var_val(runtime_environment, var_frame, var_name):
             raise FrameNotExist
 
         if var_name not in tmp_frame.keys():
-            return VariableNotExist
+            raise VariableNotExist
 
         var_value = tmp_frame[var_name]
 
