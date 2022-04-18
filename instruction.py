@@ -504,6 +504,9 @@ class Instruction:
                 var1_frame = self.arg1.get_var_frame()
                 var1_name = self.arg1.get_var_name()
 
+                if var1_frame is None or var1_name is None:
+                    raise InvalidOperandValue
+
                 check_is_existing_variable(runtime_environment, var1_frame, var1_name)
 
                 if len(runtime_environment["data_stack"]) == 0:

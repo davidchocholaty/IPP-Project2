@@ -66,7 +66,7 @@ def check_is_existing_variable(runtime_environment, var_frame, var_name):
         local_frame = local_frames_stack[-1]
 
         if var_name not in local_frame.keys():
-            return VariableNotExist
+            raise VariableNotExist
 
     elif var_frame == "TF":
         tmp_frame = runtime_environment["tmp_frame"]
@@ -75,7 +75,7 @@ def check_is_existing_variable(runtime_environment, var_frame, var_name):
             raise FrameNotExist
 
         if var_name not in tmp_frame.keys():
-            return VariableNotExist
+            raise VariableNotExist
 
 
 # https://stackoverflow.com/questions/21300996/process-decimal-escape-in-string
