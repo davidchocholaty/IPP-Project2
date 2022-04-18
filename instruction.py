@@ -330,7 +330,7 @@ class Instruction:
             if arg2_value == "nil":
                 arg2_value = None
             if arg3_value == "nil":
-                arg3_value = None
+                arg3_value = None         
 
             if arg2_value is not None and \
                     arg3_value is not None and \
@@ -680,9 +680,12 @@ class Instruction:
                                 raise InvalidStringIndex
 
                             # https://stackoverflow.com/questions/1228299/changing-one-character-in-a-string
-                            var1_value = list(var1_value)
-                            var1_value[arg2_value] = arg3_value[0]
-                            var1_value = "".join(var1_value)
+                            try:
+                                var1_value = list(var1_value)
+                                var1_value[arg2_value] = arg3_value[0]
+                                var1_value = "".join(var1_value)
+                            except IndexError:
+                                raise InvalidStringOperation
 
                         else:
                             if arg3_value is None or arg3_value == "":
@@ -790,6 +793,10 @@ class Instruction:
         except ZeroDivision:
             raise
         except UnexpectedInstructionError:
+            raise
+        except InvalidStringOperation:
+            raise
+        except InvalidStringIndex:
             raise
 
         return
