@@ -82,7 +82,11 @@ class Interpret:
         keys = list(self.order.keys())
         idx = 0                
         length = len(keys)
-        last = max(self.order)        
+        
+        try:    
+            last = max(self.order)
+        except ValueError:
+            return
         
         while idx < length:
             i = keys[idx]

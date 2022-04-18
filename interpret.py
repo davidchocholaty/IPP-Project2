@@ -135,7 +135,7 @@ def run_interpret(root, input_handler):
     except InvalidOperandType:
         sys.exit(ExitCode.RUNTIME_WRONG_OPERAND_TYPE.value)
     except MissingValueError:
-        sys.exit(ExitCode.RUNTIME_MISSING_VALUE)
+        sys.exit(ExitCode.RUNTIME_MISSING_VALUE.value)
     except ValueNotInRange:
         sys.exit(ExitCode.RUNTIME_WRONG_OPERAND_VAL.value)
     except ZeroDivision:

@@ -485,6 +485,8 @@ class Instruction:
 
                 except ValueError:
                     raise MissingValueError
+                except IndexError:
+                    raise MissingValueError
 
                 # runtime_environment["call_stack"] = call_stack[:-1]
 
@@ -493,6 +495,9 @@ class Instruction:
                     raise InvalidXMLFormat
 
                 arg1_value = self.get_arg_val_one_operand(runtime_environment)
+
+                if arg1_value is None:
+                    raise MissingValueError
 
                 runtime_environment["data_stack"].append(arg1_value)
 
@@ -548,8 +553,11 @@ class Instruction:
             elif self.opcode == "READ":
                 input_line = input_handler.readline()
 
-                if input_line[-1] == '\n':
-                    input_line = input_line[:-1]
+                try:
+                    if input_line[-1] == '\n':
+                        input_line = input_line[:-1]
+                except IndexError:
+                    return
 
                 var1_frame = self.arg1.get_var_frame()
                 var1_name = self.arg1.get_var_name()
@@ -586,6 +594,8 @@ class Instruction:
                     val = "true"
                 elif val is False:
                     val = "false"
+                elif val == "nil":
+                    val = ""
                 else:
                     val = str(val)
                     val = process_decimal_escape(val)
