@@ -19,6 +19,8 @@ from custom_exception import InvalidOperandValue, InvalidXMLFormat, FrameNotExis
 from instruction_util import save_var_to_frame, get_arg_val, check_is_existing_variable, int_str_2_int, \
     process_decimal_escape
 
+from nil import Nil
+
 # Trida reprezentujici instrukci.
 class Instruction:
     def __init__(self, root, opcode):
@@ -605,7 +607,7 @@ class Instruction:
                     if input_line[-1] == '\n':
                         input_line = input_line[:-1]
                 except IndexError:
-                    input_line = "nil"
+                    input_line = Nil()
 
                 var1_frame = self.arg1.get_var_frame()
                 var1_name = self.arg1.get_var_name()
@@ -613,29 +615,29 @@ class Instruction:
                 check_is_existing_variable(runtime_environment, var1_frame, var1_name)
                 arg2_value = self.get_arg_val_two_operands(runtime_environment)
 
-                if arg2_value == "int":
-                    if input_line == "nil":
-                        input_line = None
-                    else:                    
+                if arg2_value not in ("int", "string", "bool"):
+                    raise InvalidXMLFormat
+
+                if not isinstance(input_line, Nil):
+                    if arg2_value == "int":                                         
                         try:
                             input_line = int_str_2_int(input_line)
                         except ValueError:
-                            input_line = None
-                elif arg2_value == "string":
-                    if not isinstance(input_line, str):
-                        input_line = None
-                elif arg2_value == "bool":
-                    input_line = input_line.lower()
-
-                    if input_line == "nil":
-                        input_line = None
-                    else:                    
+                            input_line = Nil()
+                    elif arg2_value == "string":
+                        if not isinstance(input_line, str):
+                            input_line = Nil()
+                    elif arg2_value == "bool":
+                        input_line = input_line.lower()
+        
                         if input_line == "true":
                             input_line = True
-                        else:
+                        elif input_line == "false":
                             input_line = False
-                else:
-                    raise InvalidXMLFormat
+                        else:
+                            input_line = Nil()
+                    else:
+                        raise InvalidXMLFormat
 
                 save_var_to_frame(runtime_environment, var1_frame, var1_name, input_line)
 
@@ -645,7 +647,8 @@ class Instruction:
 
                 if self.arg1.get_type() == "var" and val is None:
                     raise MissingValueError
-                elif val is None:
+                                    
+                if isinstance(val, Nil):
                     val = ""                    
                 elif val is True:
                     val = "true"
