@@ -12,6 +12,7 @@
 import sys
 from handler import Creator, Handler
 
+
 # Trida pro vytvareni obsluhy souboru dle navrhoveho vzoru Tovarni metoda.
 class FileCreator(Creator):
     def _factory_method(self, arg):

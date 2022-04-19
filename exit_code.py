@@ -11,6 +11,7 @@
 
 from enum import Enum
 
+
 # Chybove kody interpreteru.
 class ExitCode(Enum):
     EXIT_SUCCESS = 0

@@ -12,6 +12,7 @@
 import xml.etree.ElementTree as ET
 
 
+# Trida reprezentujici obsluhu zpracovani vstupnich XML dat.
 class XMLParser:
     def __init__(self, source):
         self.source = source

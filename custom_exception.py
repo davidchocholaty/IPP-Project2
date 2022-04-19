@@ -9,6 +9,7 @@
 #                                                                        #
 ##########################################################################
 
+
 # Vicenasobny vyskyt.
 class MultipleOccurenceError(Exception):
     def __init__(self, msg="Multiple label definition occurence"):

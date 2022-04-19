@@ -21,6 +21,7 @@ from instruction_util import save_var_to_frame, get_arg_val, check_is_existing_v
 
 from nil import Nil
 
+
 # Trida reprezentujici instrukci.
 class Instruction:
     def __init__(self, root, opcode):

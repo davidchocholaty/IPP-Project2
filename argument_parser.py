@@ -12,6 +12,7 @@
 import argparse
 from exit_code import ExitCode
 
+
 # Vlastni trida ArgumentParser pro zmenu funkcionality argparse.ArgumentParser.
 class ArgumentParser(argparse.ArgumentParser):
 
