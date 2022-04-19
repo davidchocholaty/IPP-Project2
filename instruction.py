@@ -48,6 +48,8 @@ class Instruction:
                 raise
             except InvalidOperandValue:
                 raise
+            except MissingValueError:
+                raise
 
         else:
             raise InvalidXMLFormat
@@ -66,6 +68,8 @@ class Instruction:
             except InvalidXMLFormat:
                 raise
             except InvalidOperandValue:
+                raise
+            except MissingValueError:
                 raise
 
         else:
@@ -87,6 +91,8 @@ class Instruction:
             except InvalidXMLFormat:
                 raise
             except InvalidOperandValue:
+                raise
+            except MissingValueError:
                 raise
 
         else:
@@ -115,6 +121,8 @@ class Instruction:
         except InvalidOperandValue:
             raise
         except InvalidXMLFormat:
+            raise
+        except MissingValueError:
             raise
 
     # Ziskani hodnoty argumentu pro instrukci s jednim argumentem.
@@ -444,6 +452,8 @@ class Instruction:
                 var1_name = self.arg1.get_var_name()                
                 arg2_value = get_arg_val(runtime_environment, self.arg2)               
 
+                check_is_existing_variable(runtime_environment, var1_frame, var1_name)
+
                 save_var_to_frame(runtime_environment, var1_frame, var1_name, arg2_value)
 
             # CREATEFRAME 
@@ -624,8 +634,10 @@ class Instruction:
             elif self.opcode == "WRITE":
                 val = get_arg_val(runtime_environment, self.arg1)
 
-                if val is None:
-                    val = ""
+                if self.arg1.get_type() is None:
+                    raise MissingValueError
+                elif val is None:
+                    val = ""                    
                 elif val is True:
                     val = "true"
                 elif val is False:
@@ -647,7 +659,7 @@ class Instruction:
                 arg2_value, arg3_value = self.get_args_vals_three_operands(runtime_environment)
 
                 if not isinstance(arg2_value, str):
-                    if self.arg2.get_type() == "var":
+                    if self.arg2.get_type() == "var" and arg2_value is None:
                         raise MissingValueError
                     if arg2_value is None and isinstance(arg3_value, str):
                         concatenated = arg3_value
@@ -655,7 +667,7 @@ class Instruction:
                         raise InvalidOperandType
 
                 elif not isinstance(arg3_value, str):
-                    if self.arg3.get_type() == "var":
+                    if self.arg3.get_type() == "var" and arg3_value is None:
                         raise MissingValueError
                     if arg3_value is None and isinstance(arg2_value, str):
                         concatenated = arg2_value
@@ -679,7 +691,10 @@ class Instruction:
                     arg2_value = process_decimal_escape(arg2_value)
                     length = len(arg2_value)
                 elif arg2_value is None:
-                    length = 0
+                    if self.arg2.get_type() is None:
+                        raise MissingValueError
+                    else:
+                        length = 0
                 else:
                     raise InvalidOperandType
 
@@ -692,6 +707,9 @@ class Instruction:
 
                 check_is_existing_variable(runtime_environment, var1_frame, var1_name)
                 arg2_value, arg3_value = self.get_args_vals_three_operands(runtime_environment)
+
+                if arg2_value is None or arg3_value is None:
+                    raise MissingValueError
 
                 if isinstance(arg2_value, str) and isinstance(arg3_value, int):
                     if arg3_value < 0 or arg3_value >= len(arg2_value):
@@ -735,7 +753,7 @@ class Instruction:
                     else:
                         raise InvalidOperandType
                 else:
-                    raise InvalidStringOperation
+                    raise InvalidXMLFormat
 
                 save_var_to_frame(runtime_environment, var1_frame, var1_name, var1_value)
 
@@ -797,6 +815,9 @@ class Instruction:
             elif self.opcode == "EXIT":
                 arg1_value = get_arg_val(runtime_environment, self.arg1)
 
+                if arg1_value is None:
+                    raise MissingValueError
+
                 if not isinstance(arg1_value, int):
                     raise InvalidOperandType
 
@@ -843,6 +864,8 @@ class Instruction:
         except InvalidStringOperation:
             raise
         except InvalidStringIndex:
+            raise
+        except MissingValueError:
             raise
 
         return

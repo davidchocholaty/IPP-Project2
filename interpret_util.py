@@ -128,6 +128,8 @@ class Interpret:
                 raise
             except InvalidXMLFormat:
                 raise
+            except MissingValueError:
+                raise
 
             try:
                 instruction.execute(self.runtime_environment, self.input_handler)

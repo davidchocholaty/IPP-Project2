@@ -26,6 +26,8 @@ def create_operand(arg):
         raise
     except InvalidXMLFormat:
         raise
+    except MissingValueError:
+        raise
 
     return operand
 
@@ -66,7 +68,7 @@ class Operand:
         try:
             self.type = self.arg.attrib['type']
         except ParseError:
-            return False
+            raise MissingValueError
 
         try:
             if self.type == "var":
