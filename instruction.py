@@ -180,6 +180,9 @@ class Instruction:
         except FrameNotExist:
             raise
 
+        if isinstance(arg2_value, bool) or isinstance(arg3_value, bool):
+            raise InvalidOperandType
+
         if not isinstance(arg2_value, int) or not isinstance(arg3_value, int):
             raise InvalidOperandType
 
@@ -602,7 +605,7 @@ class Instruction:
                     if input_line[-1] == '\n':
                         input_line = input_line[:-1]
                 except IndexError:
-                    return
+                    input_line = "nil"
 
                 var1_frame = self.arg1.get_var_frame()
                 var1_name = self.arg1.get_var_name()
@@ -611,20 +614,26 @@ class Instruction:
                 arg2_value = self.get_arg_val_two_operands(runtime_environment)
 
                 if arg2_value == "int":
-                    try:
-                        input_line = int_str_2_int(input_line)
-                    except ValueError:
+                    if input_line == "nil":
                         input_line = None
+                    else:                    
+                        try:
+                            input_line = int_str_2_int(input_line)
+                        except ValueError:
+                            input_line = None
                 elif arg2_value == "string":
                     if not isinstance(input_line, str):
                         input_line = None
                 elif arg2_value == "bool":
                     input_line = input_line.lower()
 
-                    if input_line == "true":
-                        input_line = True
-                    else:
-                        input_line = False
+                    if input_line == "nil":
+                        input_line = None
+                    else:                    
+                        if input_line == "true":
+                            input_line = True
+                        else:
+                            input_line = False
                 else:
                     raise InvalidXMLFormat
 
@@ -634,7 +643,7 @@ class Instruction:
             elif self.opcode == "WRITE":
                 val = get_arg_val(runtime_environment, self.arg1)
 
-                if self.arg1.get_type() is None:
+                if self.arg1.get_type() == "var" and val is None:
                     raise MissingValueError
                 elif val is None:
                     val = ""                    
@@ -691,7 +700,7 @@ class Instruction:
                     arg2_value = process_decimal_escape(arg2_value)
                     length = len(arg2_value)
                 elif arg2_value is None:
-                    if self.arg2.get_type() is None:
+                    if self.arg2.get_type() != "string":
                         raise MissingValueError
                     else:
                         length = 0
@@ -753,7 +762,7 @@ class Instruction:
                     else:
                         raise InvalidOperandType
                 else:
-                    raise InvalidXMLFormat
+                    raise InvalidOperandType
 
                 save_var_to_frame(runtime_environment, var1_frame, var1_name, var1_value)
 
