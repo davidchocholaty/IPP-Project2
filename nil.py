@@ -1,14 +1,14 @@
 ##########################################################################
 #                                                                        #
-# Soubor: argument_parser.py                                             #
-# Vytvoren: 2022-03-28                                                   #
-# Posledni zmena: 2022-03-28                                             #
+# Soubor: nil.py                                                         #
+# Vytvoren: 2022-04-19                                                   #
+# Posledni zmena: 2022-04-19                                             #
 # Autor: David Chocholaty <xchoch09@stud.fit.vutbr.cz>                   #
 # Projekt: Uloha 2 pro predmet IPP                                       #
-# Popis: Skript pro vytvoreni vlastni verze ArgumentParser               #
+# Popis: Skript obsahujici tridu reprezentujici hodnotu nil              #
 #                                                                        #
 ##########################################################################
 
-# Vlastni trida ArgumentParser pro zmenu funkcionality argparse.ArgumentParser.
+# Trida reprezentujici hodnotu nil.
 class Nil:
     pass

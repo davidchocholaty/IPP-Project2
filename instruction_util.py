@@ -1,11 +1,11 @@
 ##########################################################################
 #                                                                        #
-# Soubor: argument_handler.py                                            #
+# Soubor: instruction_util.py                                            #
 # Vytvoren: 2022-04-03                                                   #
-# Posledni zmena: 2022-04-03                                             #
+# Posledni zmena: 2022-04-19                                             #
 # Autor: David Chocholaty <xchoch09@stud.fit.vutbr.cz>                   #
 # Projekt: Uloha 2 pro predmet IPP                                       #
-# Popis: Skript pro zpracovani uzivatelskych argumentu                   #
+# Popis: Skript pro praci s promennymi a literaly                        #
 #                                                                        #
 ##########################################################################
 
@@ -14,6 +14,7 @@ import re
 from custom_exception import InvalidXMLFormat, FrameNotExist, VariableNotExist
 
 
+# Ulozeni promenne do ramce nebo aktualizace jeji hodnoty v danem ramci.
 def save_var_to_frame(runtime_environment, var_frame, var_name, var_act_value):
     if var_frame == "GF":
         global_frame = runtime_environment["global_frame"]
@@ -50,6 +51,7 @@ def save_var_to_frame(runtime_environment, var_frame, var_name, var_act_value):
         raise InvalidXMLFormat
 
 
+# Kontrola zda promenna s danym jmenem existuje v danem ramci.
 def check_is_existing_variable(runtime_environment, var_frame, var_name):
     if var_frame == "GF":
         global_frame = runtime_environment["global_frame"]
@@ -78,11 +80,12 @@ def check_is_existing_variable(runtime_environment, var_frame, var_name):
             raise VariableNotExist
 
 
-# https://stackoverflow.com/questions/21300996/process-decimal-escape-in-string
+# Funkce nahrazeni pro funkci zpracovani escape sekvenci.
 def replace(match):
     return chr(int(match.group(1)))
 
 
+# Zpracovani escape sekvenci.
 def process_decimal_escape(string_value):
     regex = re.compile(r"\\(\d{1,3})")
     new_value = regex.sub(replace, string_value)
@@ -90,6 +93,7 @@ def process_decimal_escape(string_value):
     return new_value
 
 
+# Prevod boolean hodnoty v retezci do datoveho typu boolean.
 def bool_str_2_bool(bool_val):
     if bool_val == "true":
         return True
@@ -99,6 +103,7 @@ def bool_str_2_bool(bool_val):
         raise InvalidXMLFormat
 
 
+# Prevod int hodnoty v retezci do datoveho typu int.
 def int_str_2_int(int_val):
     try:
         val = int(int_val)
@@ -108,6 +113,7 @@ def int_str_2_int(int_val):
     return val
 
 
+# Funkce pro ziskani hodnoty promenne.
 def get_var_val(runtime_environment, var_frame, var_name):
     if var_frame == "GF":
         global_frame = runtime_environment["global_frame"]
@@ -147,6 +153,7 @@ def get_var_val(runtime_environment, var_frame, var_name):
     return var_value
 
 
+# Funkce pro ziskani hodnoty literalu.
 def get_not_var_val(arg):
     arg_type = arg.get_type()
 
@@ -179,7 +186,7 @@ def get_not_var_val(arg):
 
     return val
 
-
+# Hlavni funkce pro ziskani hodnoty - literalu nebo promenne.
 def get_arg_val(runtime_environment, arg):
     if arg.get_type() == "var":
         var_frame = arg.get_var_frame()

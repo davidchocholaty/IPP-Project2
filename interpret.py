@@ -2,7 +2,7 @@
 #                                                                        #
 # Soubor: interpret.py                                                   #
 # Vytvoren: 2022-03-28                                                   #
-# Posledni zmena: 2022-03-30                                             #
+# Posledni zmena: 2022-04-19                                             #
 # Autor: David Chocholaty <xchoch09@stud.fit.vutbr.cz>                   #
 # Projekt: Uloha 2 pro predmet IPP                                       #
 # Popis: Hlavni skript interpreteru pro jazyk IPPcode22                  #
@@ -22,6 +22,7 @@ from xml_parser import XMLParser
 from interpret_util import Interpret
 
 
+# Funkce pro vypis napovedy.
 def print_help():
     print("napoveda: interpret.py [-h] [-s ZDROJ] [-i VSTUP]")
     print("\nInterpret jazyka IPPcode22.\n")
@@ -33,6 +34,7 @@ def print_help():
     sys.exit(ExitCode.EXIT_SUCCESS.value)
 
 
+# Funkce pro ziskani obsluhy argumentu source a input.
 def handle_args(arg_handler):
     args, leftovers = arg_handler.handler
 
@@ -55,6 +57,7 @@ def handle_args(arg_handler):
     return args.source, args.input
 
 
+# Funkce pro obsluhu uzivatelskeho vstupu.
 def handle_user_input():
     arg_handler = ArgumentCreator("store_true")
 
@@ -72,6 +75,7 @@ def handle_user_input():
     return source_handler, input_handler
 
 
+# Funkce obsluhujici zpracovani vstupu ve formatu xml.
 def parse_input_xml(source_handler):
     parser = XMLParser(source_handler)
 
@@ -86,6 +90,7 @@ def parse_input_xml(source_handler):
     return root
 
 
+# Funkce pro inicializaci interpretru.
 def init_interpret(root, input_handler):
     interpret = Interpret(root)
 
@@ -115,6 +120,7 @@ def init_interpret(root, input_handler):
     return interpret
 
 
+# Funkce pro spusteni interpretru a obsluhu jeho chybovych kodu.
 def run_interpret(root, input_handler):
     interpret = init_interpret(root, input_handler)
 
@@ -150,11 +156,13 @@ def run_interpret(root, input_handler):
         sys.exit(ExitCode.INTERN_ERROR.value)
         
 
+# Funkce pro uzavreni vstupnich souboru.
 def close_files(source_handler, input_handler):
     source_handler.close()
     input_handler.close()
 
 
+# Hlavni funkce celeho interpretru.
 def main():
     source_handler, input_handler = handle_user_input()
     root = parse_input_xml(source_handler)

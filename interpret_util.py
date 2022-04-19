@@ -1,11 +1,11 @@
 ##########################################################################
 #                                                                        #
-# Soubor: interpret.py                                                   #
+# Soubor: interpret_util.py                                              #
 # Vytvoren: 2022-03-28                                                   #
-# Posledni zmena: 2022-03-30                                             #
+# Posledni zmena: 2022-04-19                                             #
 # Autor: David Chocholaty <xchoch09@stud.fit.vutbr.cz>                   #
 # Projekt: Uloha 2 pro predmet IPP                                       #
-# Popis: Hlavni skript interpreteru pro jazyk IPPcode22                  #
+# Popis: Skript obsahujici tridu reprezentujici interpret                #
 #                                                                        #
 ##########################################################################
 
@@ -16,6 +16,7 @@ from xml.etree.ElementTree import ParseError
 from instruction import Instruction
 
 
+# Trida reprezentujici interpret.
 class Interpret:
     def __init__(self, root):
         self.root = root
@@ -31,11 +32,13 @@ class Interpret:
             "data_stack": []
         }
 
+    # Test nazvu jazyka definovaneho v xml reprezentaci programu.
     def is_valid_lang(self):
         lang = self.root.attrib['language']
 
         return lang.upper() == "IPPCODE22"
 
+    # Ulozeni vsech navesti programu.
     def set_labels(self):
         try:
             for i in range(0, len(self.root)):
@@ -51,6 +54,7 @@ class Interpret:
         except KeyError:
             raise
 
+    # Ulozeni poradi vsech instrukci v xml reprezentaci programu.
     def set_order(self):
         root_order = 0
 
@@ -74,11 +78,12 @@ class Interpret:
         # https://stackoverflow.com/questions/613183/how-do-i-sort-a-dictionary-by-value
         self.order = dict(sorted(self.order.items(), key=lambda item: item[0]))
 
+    # Nastaveni obsluhy vstupu.
     def set_input_handler(self, input_handler):
         self.input_handler = input_handler
 
+    # Funkce pro spusteni a provadeni operaci interpretru.
     def run(self):
-        # skip = False
         keys = list(self.order.keys())
         idx = 0                
         length = len(keys)
@@ -92,13 +97,7 @@ class Interpret:
             i = keys[idx]
             
             if i <= 0:
-                raise KeyError                
-            
-            # if skip:
-            #    if i == self.runtime_environment["position"]:
-            #        skip = False
-            #    else:
-            #        continue            
+                raise KeyError
 
             self.runtime_environment["position"] = i
 
@@ -166,8 +165,7 @@ class Interpret:
                     idx = keys.index(i)
                 else:
                     idx = length
-                # skip = True                
-                # if self.runtime_environment["position"] < i:
+                    
             else:
                 idx = idx + 1
                                      
